@@ -1,0 +1,74 @@
+name: contact_app
+description: "A new Flutter project."
+publish_to: 'none' 
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.2
+  iconsax: ^0.0.8
+  flutter_svg: 2.0.9
+
+  flutter_bloc: ^8.1.3
+  sqflite: ^2.0.0
+  path: ^1.8.0
+  path_provider: ^2.0.1
+  dio: ^5.4.0
+  http: ^1.1.2
+  intl: ^0.19.0
+  logger: ^2.0.2
+  url_launcher: ^6.0.13
+  smooth_page_indicator: ^1.0.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^3.0.1
+
+flutter:
+
+  uses-material-design: true
+
+  # To add assets to your application, add an assets section, like this:
+  assets:
+    - assets/icons/
+    - assets/images/
+
+  fonts:
+    - family: Gilroy
+      fonts:
+        - asset: assets/fonts/Gilroy-Regular.ttf
+          weight : 400
+        - asset: assets/fonts/Gilroy-Medium.ttf
+          weight : 500
+        - asset: assets/fonts/Gilroy-SemiBold.ttf
+          weight : 600
+        - asset: assets/fonts/Gilroy-Bold.ttf
+          weight : 700
+    - family: Montserrat
+      fonts:
+        - asset: assets/fonts/Montserrat-Regular.otf
+          weight : 400
+        - asset: assets/fonts/Montserrat-Medium.otf
+          weight : 500
+        - asset: assets/fonts/Montserrat-SemiBold.otf
+          weight : 600
+        - asset: assets/fonts/Montserrat-Bold.otf
+          weight : 700
+    - family: Raleway
+      fonts:
+        - asset: assets/fonts/Raleway-Regular.ttf
+          weight : 400
+        - asset: assets/fonts/Raleway-Medium.ttf
+          weight : 500
+        - asset: assets/fonts/Raleway-SemiBold.ttf
+          weight : 600
+        - asset: assets/fonts/Raleway-Bold.ttf
+          weight : 700
+          
