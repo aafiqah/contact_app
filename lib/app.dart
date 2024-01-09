@@ -1,4 +1,5 @@
-import 'package:contact_app/pages/home.dart';
+
+import 'package:contact_app/home.dart';
 import 'package:flutter/material.dart';
 
 class App extends StatelessWidget {

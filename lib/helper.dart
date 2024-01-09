@@ -1,4 +1,4 @@
-import 'package:contact_app/models/contacts.dart';
+import 'package:contact_app/mycontact.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart'; //import these
 
@@ -8,7 +8,7 @@ class DBHelper {
   //as well as getDatabasesPath()
   static Future<Database> initDB() async {
     var dbPath = await getDatabasesPath();
-    String path = join(dbPath, 'contacts.db');
+    String path = join(dbPath, 'mycontact.db');
     //this is to create database
     return await openDatabase(path, version: 1, onCreate: _onCreate);
   }
@@ -18,10 +18,12 @@ class DBHelper {
     //this is to create table into database
     //and the command is same as SQL statement
     //you must use ''' and ''', for open and close
-    const sql = '''CREATE TABLE contacts(
+    const sql = '''CREATE TABLE mycontact(
       id INTEGER PRIMARY KEY,
-      name TEXT,
-      contact TEXT
+      firstname TEXT,
+      lastname TEXT,
+      fullname TEXT,
+      email TEXT
     )''';
     //sqflite is only support num, string, and unit8List format
     //please refer to package doc for more details
@@ -29,38 +31,45 @@ class DBHelper {
   }
 
   //build create function (insert)
-  static Future<int> createContacts(Contact contact) async {
+  static Future<int> createContacts(Mycontact mycontact) async {
     Database db = await DBHelper.initDB();
-    //create contact using insert()
-    return await db.insert('contacts', contact.toJson());
+    //create mycontact using insert()
+    //return await db.insert('mycontact', mycontact.toJson());
+    try {
+      // create mycontact using insert()
+      return await db.insert('mycontact', mycontact.toJson());
+    } catch (e) {
+      print('Error inserting data: $e');
+      return -1; // Return -1 to indicate an error
+    }
   }
 
   //build read function
-  static Future<List<Contact>> readContacts() async {
+  static Future<List<Mycontact>> readContacts() async {
     Database db = await DBHelper.initDB();
-    var contact = await db.query('contacts', orderBy: 'name');
-    //this is to list out the contact list from database
+    var mycontact = await db.query('mycontact', orderBy: 'firstname');
+    //this is to list out the mycontact list from database
     //if empty, then return empty []
-    List<Contact> contactList = contact.isNotEmpty
-        ? contact.map((details) => Contact.fromJson(details)).toList()
+    List<Mycontact> contactList = mycontact.isNotEmpty
+        ? mycontact.map((details) => Mycontact.fromJson(details)).toList()
         : [];
     return contactList;
   }
 
   //build update function
-  static Future<int> updateContacts(Contact contact) async {
+  static Future<int> updateContacts(Mycontact mycontact) async {
     Database db = await DBHelper.initDB();
-    //update the existing contact
+    //update the existing mycontact
     //according to its id
-    return await db.update('contacts', contact.toJson(),
-        where: 'id = ?', whereArgs: [contact.id]);
+    return await db.update('mycontact', mycontact.toJson(),
+        where: 'id = ?', whereArgs: [mycontact.id]);
   }
 
   //build delete function
   static Future<int> deleteContacts(int id) async {
     Database db = await DBHelper.initDB();
-    //delete existing contact
+    //delete existing mycontact
     //according to its id
-    return await db.delete('contacts', where: 'id = ?', whereArgs: [id]);
+    return await db.delete('mycontact', where: 'id = ?', whereArgs: [id]);
   }
 }

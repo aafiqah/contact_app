@@ -1,6 +1,6 @@
-import 'package:contact_app/helpers/helper.dart';
-import 'package:contact_app/pages/add_contact.dart';
-import 'package:contact_app/models/contacts.dart';
+import 'package:contact_app/add_contact.dart';
+import 'package:contact_app/helper.dart';
+import 'package:contact_app/mycontact.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -67,9 +67,10 @@ class _HomePageState extends State<HomePage> {
         ],
       );
     } else if (currentContent == 'alllist') {
-      return FutureBuilder<List<Contact>>(
+      return FutureBuilder<List<Mycontact>>(
         future: DBHelper.readContacts(),
-        builder: (BuildContext context, AsyncSnapshot<List<Contact>> snapshot) {
+        builder:
+            (BuildContext context, AsyncSnapshot<List<Mycontact>> snapshot) {
           print('Connection State: ${snapshot.connectionState}');
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
@@ -100,11 +101,11 @@ class _HomePageState extends State<HomePage> {
           } else {
             print('Data available: ${snapshot.data}');
             return ListView(
-              children: snapshot.data!.map((contacts) {
+              children: snapshot.data!.map((mycontact) {
                 return Center(
                   child: ListTile(
-                    title: Text(contacts.name),
-                    subtitle: Text(contacts.contact),
+                    title: Text(mycontact.fullname),
+                    subtitle: Text(mycontact.email),
                     trailing: IconButton(
                       icon: const Icon(Icons.send),
                       onPressed: () {},
@@ -274,8 +275,8 @@ class _HomePageState extends State<HomePage> {
     return Builder(
       builder: (context) => FloatingActionButton(
         onPressed: () async {
-          final refresh = await Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => AddContacts()));
+          final refresh = await Navigator.of(context)
+              .push(MaterialPageRoute(builder: (_) => AddContacts()));
           if (refresh == true) {
             setState(() {
               currentContent = 'alllist';
