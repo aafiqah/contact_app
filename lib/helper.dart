@@ -10,8 +10,21 @@ class DBHelper {
     var dbPath = await getDatabasesPath();
     String path = join(dbPath, 'mycontact.db');
     //this is to create database
-    return await openDatabase(path, version: 1, onCreate: _onCreate);
+    return await openDatabase(path, version: 3, onCreate: _onCreate, onUpgrade: _onUpgrade);
   }
+
+  static void _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    print('Upgrading database from version $oldVersion to $newVersion');
+    if (oldVersion < 3) {
+      print('Performing schema update for version 3');
+      const sql = 'ALTER TABLE mycontact ADD COLUMN profileImage TEXT';
+      await db.execute(sql);
+    }
+    // Add more upgrade logic for future versions if needed
+    print('Upgrade complete');
+  }
+
+
 
   //build _onCreate function
   static Future _onCreate(Database db, int version) async {
@@ -19,11 +32,13 @@ class DBHelper {
     //and the command is same as SQL statement
     //you must use ''' and ''', for open and close
     const sql = '''CREATE TABLE mycontact(
-      id INTEGER PRIMARY KEY,
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
       firstname TEXT,
       lastname TEXT,
       fullname TEXT,
-      email TEXT
+      email TEXT,
+      profileImage TEXT, 
+      isFavorite INTEGER
     )''';
     //sqflite is only support num, string, and unit8List format
     //please refer to package doc for more details
@@ -47,7 +62,7 @@ class DBHelper {
   //build read function
   static Future<List<Mycontact>> readContacts() async {
     Database db = await DBHelper.initDB();
-    var mycontact = await db.query('mycontact', orderBy: 'firstname');
+    var mycontact = await db.query('mycontact', orderBy: 'fullname');
     //this is to list out the mycontact list from database
     //if empty, then return empty []
     List<Mycontact> contactList = mycontact.isNotEmpty

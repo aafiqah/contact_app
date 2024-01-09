@@ -1,4 +1,6 @@
-import 'package:contact_app/add_contact.dart';
+import 'dart:io';
+import 'package:flutter/widgets.dart';
+import 'package:contact_app/pages/add_contact.dart';
 import 'package:contact_app/helper.dart';
 import 'package:contact_app/mycontact.dart';
 import 'package:flutter/material.dart';
@@ -102,14 +104,21 @@ class _HomePageState extends State<HomePage> {
             print('Data available: ${snapshot.data}');
             return ListView(
               children: snapshot.data!.map((mycontact) {
-                return Center(
-                  child: ListTile(
-                    title: Text(mycontact.fullname),
-                    subtitle: Text(mycontact.email),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.send),
-                      onPressed: () {},
-                    ),
+                return ListTile(
+                  leading: CircleAvatar(
+                    radius: 30,
+                    backgroundImage: mycontact.profileImage != null
+                        ? FileImage(File(mycontact.profileImage!))
+                            as ImageProvider<Object>
+                        : AssetImage(
+                                'assets/icons/Profile.svg')
+                            as ImageProvider<Object>,
+                  ),
+                  title: Text(mycontact.fullname),
+                  subtitle: Text(mycontact.email),
+                  trailing: IconButton(
+                    icon: Image.asset('assets/icons/Send.png'),
+                    onPressed: () {},
                   ),
                 );
               }).toList(),
@@ -284,6 +293,9 @@ class _HomePageState extends State<HomePage> {
           }
         },
         backgroundColor: const Color.fromARGB(255, 50, 186, 165),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(50.0), // Adjust the radius as needed
+        ),
         child: const Icon(
           Icons.add,
           color: Colors.white,

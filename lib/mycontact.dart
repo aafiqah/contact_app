@@ -4,15 +4,25 @@ class Mycontact {
   String lastname;
   String fullname;
   String email;
+  String? profileImage;
+  int? isFavorite;
 
-  Mycontact({this.id, required this.firstname, required this.lastname, required this.fullname, required this.email});
+  Mycontact({
+    this.id, 
+    required this.firstname, 
+    required this.lastname, 
+    required this.email,
+    this.profileImage,
+    this.isFavorite,
+  }) : fullname = '$firstname $lastname';
 
   factory Mycontact.fromJson(Map<String, dynamic> json) => Mycontact(
         id: json['id'],
         firstname: json['firstname'],
         lastname: json['lastname'],
-        fullname: json['fullname'],
         email: json['email'],
+        profileImage: json['profileImage'],
+        isFavorite: json['isFavorite'],
       );
 
   Map<String, dynamic> toJson() => {
@@ -21,5 +31,7 @@ class Mycontact {
         'lastname': lastname,
         'fullname': fullname,
         'email': email,
+        'profileImage': profileImage,
+        'isFavorite': isFavorite,
       };
 }
