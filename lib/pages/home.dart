@@ -1,10 +1,10 @@
 import 'dart:io';
-import 'package:flutter/widgets.dart';
 import 'package:contact_app/pages/add_contact.dart';
 import 'package:contact_app/helper.dart';
 import 'package:contact_app/mycontact.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -73,14 +73,45 @@ class _HomePageState extends State<HomePage> {
         future: DBHelper.readContacts(),
         builder:
             (BuildContext context, AsyncSnapshot<List<Mycontact>> snapshot) {
-          print('Connection State: ${snapshot.connectionState}');
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
               child: CircularProgressIndicator(),
             );
-          } else if (!snapshot.hasData) {
-            print('No data');
-            // Show the default image if there's no data
+          } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+            return ListView.separated(
+              separatorBuilder: (BuildContext context, int index) =>
+                  const SizedBox(height: 10),
+              itemCount: snapshot.data!.length,
+              itemBuilder: (BuildContext context, int index) {
+                Mycontact mycontact = snapshot.data![index];
+                return Slidable(
+                  key: ValueKey(mycontact.id),
+                  endActionPane: ActionPane(
+                    motion: const BehindMotion(),
+                    dismissible: DismissiblePane(onDismissed: () {}),                    
+                    children: [                                            
+                      SlidableAction(
+                        onPressed: (context) => editContact(mycontact),
+                        backgroundColor:
+                            const Color.fromARGB(255, 235, 248, 246),
+                        foregroundColor: const Color.fromRGBO(242, 201, 76, 100),
+                        icon: Icons.edit,  
+                      ),
+                      SlidableAction(
+                        onPressed: (context) => deleteContact(mycontact),
+                        backgroundColor:
+                            const Color.fromARGB(255, 235, 248, 246),
+                        foregroundColor: Colors.red,
+                        icon: Icons.delete,
+                      ),
+                    ],
+                  ),
+                  child: builContactListTile(mycontact),
+                );
+              },
+            );
+          } else {
+            // No data available
             return Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -100,29 +131,6 @@ class _HomePageState extends State<HomePage> {
                 ),
               ],
             );
-          } else {
-            print('Data available: ${snapshot.data}');
-            return ListView(
-              children: snapshot.data!.map((mycontact) {
-                return ListTile(
-                  leading: CircleAvatar(
-                    radius: 30,
-                    backgroundImage: mycontact.profileImage != null
-                        ? FileImage(File(mycontact.profileImage!))
-                            as ImageProvider<Object>
-                        : AssetImage(
-                                'assets/icons/Profile.svg')
-                            as ImageProvider<Object>,
-                  ),
-                  title: Text(mycontact.fullname),
-                  subtitle: Text(mycontact.email),
-                  trailing: IconButton(
-                    icon: Image.asset('assets/icons/Send.png'),
-                    onPressed: () {},
-                  ),
-                );
-              }).toList(),
-            );
           }
         },
       );
@@ -140,6 +148,121 @@ class _HomePageState extends State<HomePage> {
     } else {
       return const SizedBox.shrink();
     }
+  }
+
+  void deleteContact(Mycontact mycontact) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Deletion'),
+          content: Text(
+            'Are you sure you want to delete\n${mycontact.fullname} contact?',
+          ),
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(
+                5.0), // Adjust the border radius as needed
+          ),
+          actions: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    // Delete the contact and close the dialog
+                    DBHelper.deleteContacts(mycontact.id!);
+                    Navigator.of(context).pop();
+                    _showSnackBar(context, '${mycontact.fullname} is deleted',
+                        Colors.red);
+                    refreshHomePage();
+                  },
+                  style: TextButton.styleFrom(
+                    side: const BorderSide(
+                      color: Color(0xFFDBDBDB), // Border color for "No" button
+                      width: 2.0, // Border width
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(0.0), // Adjust border radius
+                    ),
+                    minimumSize: const Size(100.0, 50.0),
+                  ),
+                  child: const Text(
+                    'Yes',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontFamily: 'Raleway',
+                      fontWeight: FontWeight.w500,
+                      height: 0.09,
+                      color: Color(0xFFFC1212), // Text color for "Yes" button
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Close the dialog
+                  },
+                  style: TextButton.styleFrom(
+                    side: const BorderSide(
+                      color: Color(0xFFDBDBDB), // Border color for "No" button
+                      width: 2.0, // Border width
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(0.0), // Adjust border radius
+                    ),
+                    minimumSize: const Size(100.0, 50.0),
+                  ),
+                  child: const Text(
+                    'No',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontFamily: 'Raleway',
+                      fontWeight: FontWeight.w500,
+                      height: 0.09,
+                      color: Color(0xFF32BAA5), // Text color for "No" button
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void editContact(Mycontact mycontact) async {
+    await Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => AddContacts(mycontact: mycontact),
+    ));
+    _showSnackBar(context, '${mycontact.fullname} is updated', Colors.green);
+    refreshHomePage();
+  }
+
+  void _showSnackBar(
+      BuildContext context, String message, MaterialColor color) {
+    final snackBar = SnackBar(content: Text(message), backgroundColor: color);
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  ListTile builContactListTile(Mycontact mycontact) {
+    return ListTile(
+      leading: CircleAvatar(
+        radius: 30,
+        backgroundImage: mycontact.profileImage != null
+            ? FileImage(File(mycontact.profileImage!)) as ImageProvider<Object>
+            : AssetImage('assets/icons/Profile.svg') as ImageProvider<Object>,
+      ),
+      title: Text(mycontact.fullname),
+      subtitle: Text(mycontact.email),
+      onTap: () {},
+      trailing: IconButton(
+        icon: Image.asset('assets/images/Send.png'),
+        onPressed: () {},
+      ),
+    );
   }
 
   Widget _favouriteContacts(String searchText) {
@@ -294,7 +417,8 @@ class _HomePageState extends State<HomePage> {
         },
         backgroundColor: const Color.fromARGB(255, 50, 186, 165),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(50.0), // Adjust the radius as needed
+          borderRadius:
+              BorderRadius.circular(50.0), // Adjust the radius as needed
         ),
         child: const Icon(
           Icons.add,

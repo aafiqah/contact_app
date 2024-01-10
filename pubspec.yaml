@@ -24,7 +24,8 @@ dependencies:
   logger: ^2.0.2
   url_launcher: ^6.0.13
   smooth_page_indicator: ^1.0.3
-  image_picker: ^0.8.4+2
+  image_picker: ^1.0.7
+  flutter_slidable: ^3.0.1
 
 dev_dependencies:
   flutter_test:
