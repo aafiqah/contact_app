@@ -4,16 +4,16 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 
-class AddContacts extends StatefulWidget {
-  AddContacts({Key? key, this.mycontact}) : super(key: key);
+class AddEditContacts extends StatefulWidget {
+  AddEditContacts({Key? key, this.mycontact}) : super(key: key);
 
   final Mycontact? mycontact;
 
   @override
-  State<AddContacts> createState() => _AddContactsState();
+  State<AddEditContacts> createState() => _AddEditState();
 }
 
-class _AddContactsState extends State<AddContacts> {
+class _AddEditState extends State<AddEditContacts> {
   final _firstnameController = TextEditingController();
   final _lastnameController = TextEditingController();
   final _fullnameController = TextEditingController();
@@ -28,10 +28,16 @@ class _AddContactsState extends State<AddContacts> {
     if (widget.mycontact != null) {
       _firstnameController.text = widget.mycontact!.firstname;
       _lastnameController.text = widget.mycontact!.lastname;
-      _fullnameController.text = widget.mycontact!.fullname;
       _emailController.text = widget.mycontact!.email;
       _profileImageController.text = widget.mycontact!.profileImage ?? '';
-      _isFavoriteController.text = widget.mycontact!.isFavorite?.toString() ?? '';
+
+      // Load the profile image if it exists
+      if (_profileImageController.text.isNotEmpty) {
+        _image = File(_profileImageController.text);
+      }
+
+      _isFavoriteController.text =
+          widget.mycontact!.isFavorite?.toString() ?? '';
     }
     super.initState();
   }
@@ -93,33 +99,33 @@ class _AddContactsState extends State<AddContacts> {
     );
   }
 
-  Widget _buildTextField(
-  TextEditingController controller, String hintText) {
-  return TextField(
-    controller: controller,
-    decoration: InputDecoration(
-      labelText: hintText,
-      hintText: '',
-      contentPadding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 20.0),
-      floatingLabelBehavior: FloatingLabelBehavior.auto,
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(30.0),
-        borderSide: const BorderSide(
-          color: Colors.grey,
+  Widget _buildTextField(TextEditingController controller, String hintText) {
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: hintText,
+        hintText: '',
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 20.0, horizontal: 20.0),
+        floatingLabelBehavior: FloatingLabelBehavior.auto,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30.0),
+          borderSide: const BorderSide(
+            color: Colors.grey,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30.0),
+          borderSide: const BorderSide(
+            color: Color.fromARGB(255, 50, 186, 165),
+          ),
         ),
       ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(30.0),
-        borderSide: const BorderSide(
-          color: Color.fromARGB(255, 50, 186, 165),
-        ),
-      ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildElevatedButton(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
         onPressed: () async {
@@ -159,10 +165,12 @@ class _AddContactsState extends State<AddContacts> {
   }
 
   AppBar buildAppBar(BuildContext context) {
+    String title = widget.mycontact != null ? 'Edit Contact' : 'Add Contact';
+
     return AppBar(
-      title: const Text(
-        'Add Contacts',
-        style: TextStyle(
+      title: Text(
+        title,
+        style: const TextStyle(
           color: Colors.white,
           fontSize: 18,
           fontWeight: FontWeight.bold,
@@ -182,15 +190,15 @@ class _AddContactsState extends State<AddContacts> {
   }
 
   Future _pickImage() async {
-  final ImagePicker _picker = ImagePicker();
-  final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    final ImagePicker _picker = ImagePicker();
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
 
-  if (image != null) {
-    setState(() {
-      _image = File(image.path);
-      _profileImageController.text = image.path; // Set the image path in the controller
-    });
+    if (image != null) {
+      setState(() {
+        _image = File(image.path);
+        _profileImageController.text =
+            image.path; // Set the image path in the controller
+      });
+    }
   }
-}
-
 }

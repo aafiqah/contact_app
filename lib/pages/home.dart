@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:contact_app/pages/add_contact.dart';
+import 'package:contact_app/pages/add_edit_contact.dart';
 import 'package:contact_app/helper.dart';
 import 'package:contact_app/mycontact.dart';
 import 'package:flutter/material.dart';
@@ -88,14 +88,15 @@ class _HomePageState extends State<HomePage> {
                   key: ValueKey(mycontact.id),
                   endActionPane: ActionPane(
                     motion: const BehindMotion(),
-                    dismissible: DismissiblePane(onDismissed: () {}),                    
-                    children: [                                            
+                    dismissible: DismissiblePane(onDismissed: () {}),
+                    children: [
                       SlidableAction(
                         onPressed: (context) => editContact(mycontact),
                         backgroundColor:
                             const Color.fromARGB(255, 235, 248, 246),
-                        foregroundColor: const Color.fromRGBO(242, 201, 76, 100),
-                        icon: Icons.edit,  
+                        foregroundColor:
+                            const Color.fromRGBO(242, 201, 76, 100),
+                        icon: Icons.edit,
                       ),
                       SlidableAction(
                         onPressed: (context) => deleteContact(mycontact),
@@ -235,7 +236,7 @@ class _HomePageState extends State<HomePage> {
 
   void editContact(Mycontact mycontact) async {
     await Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => AddContacts(mycontact: mycontact),
+      builder: (_) => AddEditContacts(mycontact: mycontact),
     ));
     _showSnackBar(context, '${mycontact.fullname} is updated', Colors.green);
     refreshHomePage();
@@ -408,7 +409,7 @@ class _HomePageState extends State<HomePage> {
       builder: (context) => FloatingActionButton(
         onPressed: () async {
           final refresh = await Navigator.of(context)
-              .push(MaterialPageRoute(builder: (_) => AddContacts()));
+              .push(MaterialPageRoute(builder: (_) => AddEditContacts()));
           if (refresh == true) {
             setState(() {
               currentContent = 'alllist';
@@ -438,7 +439,7 @@ class _HomePageState extends State<HomePage> {
 
   void navigateToDetail() {
     Navigator.push(context, MaterialPageRoute(builder: (context) {
-      return AddContacts();
+      return AddEditContacts();
     }));
   }
 }
