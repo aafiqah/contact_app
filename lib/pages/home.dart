@@ -18,6 +18,8 @@ class _HomePageState extends State<HomePage> {
   String currentContent = 'image'; // Initial content
   String selectedCategory = 'all'; // Initial selected category
 
+  TextEditingController searchController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -79,12 +81,19 @@ class _HomePageState extends State<HomePage> {
               child: CircularProgressIndicator(),
             );
           } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+            // Filter contacts based on search text
+            List<Mycontact> filteredContacts = snapshot.data!
+                .where((contact) => contact.fullname
+                    .toLowerCase()
+                    .contains(searchController.text.toLowerCase()))
+                .toList();
+
             return ListView.separated(
               separatorBuilder: (BuildContext context, int index) =>
                   const SizedBox(height: 10),
-              itemCount: snapshot.data!.length,
+              itemCount: filteredContacts.length,
               itemBuilder: (BuildContext context, int index) {
-                Mycontact mycontact = snapshot.data![index];
+                Mycontact mycontact = filteredContacts[index];
                 return Slidable(
                   key: ValueKey(mycontact.id),
                   endActionPane: ActionPane(
@@ -138,15 +147,76 @@ class _HomePageState extends State<HomePage> {
         },
       );
     } else if (currentContent == 'favouritelist') {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            'assets/images/home_img.png',
-            height: 260,
-            width: 260,
-          ),
-        ],
+      return FutureBuilder<List<Mycontact>>(
+        future: DBHelper.readContacts(),
+        builder:
+            (BuildContext context, AsyncSnapshot<List<Mycontact>> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+            List<Mycontact> contactsToShow = snapshot.data!
+                .where((contact) => contact.isFavorite == '1')
+                .toList();
+
+            return ListView.separated(
+              separatorBuilder: (BuildContext context, int index) =>
+                  const SizedBox(height: 10),
+              itemCount: contactsToShow.length,
+              itemBuilder: (BuildContext context, int index) {
+                Mycontact mycontact = contactsToShow[index];
+                return Slidable(
+                  key: ValueKey(mycontact.id),
+                  endActionPane: ActionPane(
+                    motion: const BehindMotion(),
+                    dismissible: DismissiblePane(onDismissed: () {}),
+                    children: [
+                      SlidableAction(
+                        onPressed: (context) => editContact(mycontact),
+                        backgroundColor:
+                            const Color.fromARGB(255, 235, 248, 246),
+                        foregroundColor:
+                            const Color.fromRGBO(242, 201, 76, 100),
+                        icon: Icons.edit,
+                        padding: const EdgeInsets.all(0.0),
+                      ),
+                      SlidableAction(
+                        onPressed: (context) => deleteContact(mycontact),
+                        backgroundColor:
+                            const Color.fromARGB(255, 235, 248, 246),
+                        foregroundColor: Colors.red,
+                        icon: Icons.delete,
+                      ),
+                    ],
+                  ),
+                  child: buildContactListTile(mycontact),
+                );
+              },
+            );
+          } else {
+            // No data available
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(
+                  'assets/images/home_img.png',
+                  height: 260,
+                  width: 260,
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  'No list of Contacts here\nAdd Contact Now',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            );
+          }
+        },
       );
     } else {
       return const SizedBox.shrink();
@@ -354,32 +424,48 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       child: TextField(
+        controller: searchController,
+        onChanged: (value) {
+          // Debounce the search by delaying it for 300 milliseconds
+          Future.delayed(const Duration(milliseconds: 300), () {
+            setState(() {});
+          });
+        },
         decoration: InputDecoration(
           filled: true,
           fillColor: Colors.white,
           contentPadding: const EdgeInsets.all(15),
           hintText: 'Search',
           hintStyle: const TextStyle(color: Color(0xffDDDADA), fontSize: 14),
-          suffixIcon: SizedBox(
-            width: 100,
-            child: IntrinsicHeight(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  const VerticalDivider(
-                    color: Colors.black,
-                    indent: 10,
-                    endIndent: 10,
-                    thickness: 0.1,
+          suffixIcon: searchController.text.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    // Clear the search text
+                    searchController.clear();
+                    setState(() {});
+                  },
+                )
+              : SizedBox(
+                  width: 100,
+                  child: IntrinsicHeight(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        const VerticalDivider(
+                          color: Colors.black,
+                          indent: 10,
+                          endIndent: 10,
+                          thickness: 0.1,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: SvgPicture.asset('assets/icons/Search.svg'),
+                        ),
+                      ],
+                    ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: SvgPicture.asset('assets/icons/Search.svg'),
-                  ),
-                ],
-              ),
-            ),
-          ),
+                ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(15),
             borderSide: BorderSide.none,
@@ -454,13 +540,13 @@ class _HomePageState extends State<HomePage> {
       selectedCategory = 'all';
     });
     if (selectedCategory == 'favourite') {
-    // If you are on the favorite tab, fetch and display updated favorite list
-    // You might want to implement a method to fetch the favorite list
-    // e.g., fetchFavoriteContacts() and set it to the state variable
-    setState(() {
-      // favoriteContacts = await fetchFavoriteContacts();
-    });
-  }
+      // If you are on the favorite tab, fetch and display updated favorite list
+      // You might want to implement a method to fetch the favorite list
+      // e.g., fetchFavoriteContacts() and set it to the state variable
+      setState(() {
+        // favoriteContacts = await fetchFavoriteContacts();
+      });
+    }
   }
 
   void navigateToDetail() {
