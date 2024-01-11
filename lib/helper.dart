@@ -10,12 +10,12 @@ class DBHelper {
     var dbPath = await getDatabasesPath();
     String path = join(dbPath, 'mycontact.db');
     //this is to create database
-    return await openDatabase(path, version: 3, onCreate: _onCreate, onUpgrade: _onUpgrade);
+    return await openDatabase(path, version: 4, onCreate: _onCreate, onUpgrade: _onUpgrade);
   }
 
   static void _onUpgrade(Database db, int oldVersion, int newVersion) async {
     print('Upgrading database from version $oldVersion to $newVersion');
-    if (oldVersion < 3) {
+    if (oldVersion < 4) {
       print('Performing schema update for version 3');
       const sql = 'ALTER TABLE mycontact ADD COLUMN profileImage TEXT';
       await db.execute(sql);
@@ -23,8 +23,6 @@ class DBHelper {
     // Add more upgrade logic for future versions if needed
     print('Upgrade complete');
   }
-
-
 
   //build _onCreate function
   static Future _onCreate(Database db, int version) async {
@@ -38,7 +36,7 @@ class DBHelper {
       fullname TEXT,
       email TEXT,
       profileImage TEXT, 
-      isFavorite INTEGER
+      isFavorite TEXT
     )''';
     //sqflite is only support num, string, and unit8List format
     //please refer to package doc for more details
@@ -80,6 +78,17 @@ class DBHelper {
         where: 'id = ?', whereArgs: [mycontact.id]);
   }
 
+  static Future<int> updateContactFavoriteStatus(int id, String isFavorite) async {
+    Database db = await DBHelper.initDB();
+    // update the isFavorite field for the specified contact ID
+    return await db.update(
+      'mycontact',
+      {'isFavorite': isFavorite},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
   //build delete function
   static Future<int> deleteContacts(int id) async {
     Database db = await DBHelper.initDB();
@@ -87,4 +96,5 @@ class DBHelper {
     //according to its id
     return await db.delete('mycontact', where: 'id = ?', whereArgs: [id]);
   }
+
 }

@@ -5,7 +5,7 @@ class Mycontact {
   String fullname;
   String email;
   String? profileImage;
-  int? isFavorite;
+  String? isFavorite;
 
   Mycontact({
     this.id, 

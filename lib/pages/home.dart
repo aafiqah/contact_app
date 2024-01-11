@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:contact_app/pages/add_edit_contact.dart';
 import 'package:contact_app/helper.dart';
 import 'package:contact_app/mycontact.dart';
+import 'package:contact_app/pages/profile_contact.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -97,6 +98,7 @@ class _HomePageState extends State<HomePage> {
                         foregroundColor:
                             const Color.fromRGBO(242, 201, 76, 100),
                         icon: Icons.edit,
+                        padding: const EdgeInsets.all(0.0),
                       ),
                       SlidableAction(
                         onPressed: (context) => deleteContact(mycontact),
@@ -107,7 +109,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ],
                   ),
-                  child: builContactListTile(mycontact),
+                  child: buildContactListTile(mycontact),
                 );
               },
             );
@@ -248,7 +250,7 @@ class _HomePageState extends State<HomePage> {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  ListTile builContactListTile(Mycontact mycontact) {
+  ListTile buildContactListTile(Mycontact mycontact) {
     return ListTile(
       leading: CircleAvatar(
         radius: 30,
@@ -256,12 +258,29 @@ class _HomePageState extends State<HomePage> {
             ? FileImage(File(mycontact.profileImage!)) as ImageProvider<Object>
             : AssetImage('assets/icons/Profile.svg') as ImageProvider<Object>,
       ),
-      title: Text(mycontact.fullname),
+      title: Row(
+        children: [
+          Text(mycontact.fullname),
+          const SizedBox(width: 8),
+          if (mycontact.isFavorite == '1')
+            const Icon(
+              Icons.star,
+              color: Colors.yellow,
+            ),
+        ],
+      ),
       subtitle: Text(mycontact.email),
       onTap: () {},
       trailing: IconButton(
         icon: Image.asset('assets/images/Send.png'),
-        onPressed: () {},
+        onPressed: () async {
+          await Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) => ProfileContact(mycontact: mycontact),
+          ));
+
+// This will be executed when ProfileContact is popped
+          refreshHomePage();
+        },
       ),
     );
   }
@@ -409,7 +428,7 @@ class _HomePageState extends State<HomePage> {
       builder: (context) => FloatingActionButton(
         onPressed: () async {
           final refresh = await Navigator.of(context)
-              .push(MaterialPageRoute(builder: (_) => AddEditContacts()));
+              .push(MaterialPageRoute(builder: (_) => const AddEditContacts()));
           if (refresh == true) {
             setState(() {
               currentContent = 'alllist';
@@ -418,8 +437,7 @@ class _HomePageState extends State<HomePage> {
         },
         backgroundColor: const Color.fromARGB(255, 50, 186, 165),
         shape: RoundedRectangleBorder(
-          borderRadius:
-              BorderRadius.circular(50.0), // Adjust the radius as needed
+          borderRadius: BorderRadius.circular(50.0),
         ),
         child: const Icon(
           Icons.add,
@@ -435,11 +453,19 @@ class _HomePageState extends State<HomePage> {
       currentContent = 'alllist';
       selectedCategory = 'all';
     });
+    if (selectedCategory == 'favourite') {
+    // If you are on the favorite tab, fetch and display updated favorite list
+    // You might want to implement a method to fetch the favorite list
+    // e.g., fetchFavoriteContacts() and set it to the state variable
+    setState(() {
+      // favoriteContacts = await fetchFavoriteContacts();
+    });
+  }
   }
 
   void navigateToDetail() {
     Navigator.push(context, MaterialPageRoute(builder: (context) {
-      return AddEditContacts();
+      return const AddEditContacts();
     }));
   }
 }

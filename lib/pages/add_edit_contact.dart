@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 
 class AddEditContacts extends StatefulWidget {
-  AddEditContacts({Key? key, this.mycontact}) : super(key: key);
+  const AddEditContacts({Key? key, this.mycontact}) : super(key: key);
 
   final Mycontact? mycontact;
 
@@ -16,7 +16,6 @@ class AddEditContacts extends StatefulWidget {
 class _AddEditState extends State<AddEditContacts> {
   final _firstnameController = TextEditingController();
   final _lastnameController = TextEditingController();
-  final _fullnameController = TextEditingController();
   final _emailController = TextEditingController();
   final _profileImageController = TextEditingController();
   final _isFavoriteController = TextEditingController();
@@ -25,28 +24,26 @@ class _AddEditState extends State<AddEditContacts> {
 
   @override
   void initState() {
+    super.initState();
     if (widget.mycontact != null) {
       _firstnameController.text = widget.mycontact!.firstname;
       _lastnameController.text = widget.mycontact!.lastname;
       _emailController.text = widget.mycontact!.email;
       _profileImageController.text = widget.mycontact!.profileImage ?? '';
 
-      // Load the profile image if it exists
+       // Load the profile image if it exists
       if (_profileImageController.text.isNotEmpty) {
         _image = File(_profileImageController.text);
       }
 
-      _isFavoriteController.text =
-          widget.mycontact!.isFavorite?.toString() ?? '';
+     _isFavoriteController.text = widget.mycontact!.isFavorite ?? '';
     }
-    super.initState();
   }
 
   @override
   void dispose() {
     _firstnameController.dispose();
     _lastnameController.dispose();
-    _fullnameController.dispose();
     _emailController.dispose();
     _profileImageController.dispose();
     _isFavoriteController.dispose();
@@ -83,19 +80,41 @@ class _AddEditState extends State<AddEditContacts> {
   }
 
   Widget _buildAvatar() {
-    return CircleAvatar(
-      radius: 50,
-      backgroundColor: Colors.grey[300],
-      child: _image != null
-          ? ClipOval(
-              child: Image.file(
-                _image!,
-                width: 100,
-                height: 100,
-                fit: BoxFit.cover,
+    return SizedBox(
+      height: 120,
+      child: Stack(
+        children: [
+          CircleAvatar(
+            radius: 50,
+            backgroundColor: Colors.grey[300],
+            child: _image != null
+                ? ClipOval(
+                    child: Image.file(
+                      _image!,
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.cover,
+                    ),
+                  )
+                : const Icon(Icons.camera_alt),
+          ),
+          Positioned(
+            bottom: 2,
+            right: -12,
+            child: IconButton(
+              icon: const Icon(
+                    Icons.edit,
+                    color: Colors.green,
               ),
-            )
-          : const Icon(Icons.camera_alt),
+              onPressed: () {
+                setState(() {
+                  
+                });
+              },
+            ),
+          ),          
+        ],
+      ),
     );
   }
 
@@ -104,7 +123,6 @@ class _AddEditState extends State<AddEditContacts> {
       controller: controller,
       decoration: InputDecoration(
         labelText: hintText,
-        hintText: '',
         contentPadding:
             const EdgeInsets.symmetric(vertical: 20.0, horizontal: 20.0),
         floatingLabelBehavior: FloatingLabelBehavior.auto,
@@ -135,7 +153,7 @@ class _AddEditState extends State<AddEditContacts> {
               firstname: _firstnameController.text,
               lastname: _lastnameController.text,
               email: _emailController.text,
-              profileImage: _profileImageController.text,
+              profileImage: _profileImageController.text, 
             ));
             Navigator.of(context).pop(true);
           } else {
@@ -144,6 +162,7 @@ class _AddEditState extends State<AddEditContacts> {
               lastname: _lastnameController.text,
               email: _emailController.text,
               profileImage: _profileImageController.text,
+              isFavorite: _isFavoriteController.text,      
             ));
             Navigator.of(context).pop(true);
           }
@@ -153,7 +172,7 @@ class _AddEditState extends State<AddEditContacts> {
           padding: const EdgeInsets.all(15),
         ),
         child: const Text(
-          'Add Contact',
+          'Done',
           style: TextStyle(
             color: Colors.white,
             fontSize: 18,
@@ -190,14 +209,15 @@ class _AddEditState extends State<AddEditContacts> {
   }
 
   Future _pickImage() async {
-    final ImagePicker _picker = ImagePicker();
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
     if (image != null) {
+      print('Selected Image Path: ${image.path}');
       setState(() {
         _image = File(image.path);
-        _profileImageController.text =
-            image.path; // Set the image path in the controller
+        _profileImageController.text = image.path;
+        print('Profile Image Controller: ${_profileImageController.text}');
       });
     }
   }
