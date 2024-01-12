@@ -1,82 +1,54 @@
-import 'package:contact_app/helper.dart';
-import 'package:contact_app/mycontact.dart';
+import 'dart:io';
+import 'package:contact_app/api/api_service.dart';
+import 'package:contact_app/api/user_model.dart';
 import 'package:contact_app/pages/add_edit_contact.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'dart:io';
 
 class ProfileContact extends StatefulWidget {
-  const ProfileContact({super.key, this.mycontact});
+  const ProfileContact({super.key, this.user});
 
-  final Mycontact? mycontact;
+  final UserModel? user;
 
   @override
   State<ProfileContact> createState() => _ProfileContactState();
 }
 
 class _ProfileContactState extends State<ProfileContact> {
-  final _firstnameController = TextEditingController();
-  final _lastnameController = TextEditingController();
-  final _fullnameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _profileImageController = TextEditingController();
-  final _isFavoriteController = TextEditingController();
+  late TextEditingController _firstnameController;
+  late TextEditingController _lastnameController;
+  late TextEditingController _fullnameController;
+  late TextEditingController _emailController;
+  late TextEditingController _avatarController;
+  late TextEditingController _isFavoriteController;
 
   File? _image;
 
   @override
   void initState() {
     super.initState();
-    if (widget.mycontact != null) {
-      _firstnameController.text = widget.mycontact!.firstname;
-      _lastnameController.text = widget.mycontact!.lastname;
-      _fullnameController.text = widget.mycontact!.fullname;
-      _emailController.text = widget.mycontact!.email;
-      _profileImageController.text = widget.mycontact!.profileImage ?? '';
-      _isFavoriteController.text = widget.mycontact!.isFavorite ?? '';
+    _firstnameController = TextEditingController();
+    _lastnameController = TextEditingController();
+    _fullnameController = TextEditingController();
+    _emailController = TextEditingController();
+    _avatarController = TextEditingController();
+    _isFavoriteController = TextEditingController();
 
-      if (_profileImageController.text.isNotEmpty) {
-        _image = File(_profileImageController.text);
+    if (widget.user != null) {
+      _firstnameController.text = widget.user!.firstName;
+      _lastnameController.text = widget.user!.lastName;
+      _fullnameController.text =
+          "${widget.user!.firstName} ${widget.user!.lastName}";
+      _emailController.text = widget.user!.email;
+      _avatarController.text = widget.user!.avatar;
+      _isFavoriteController.text =
+          '0'; // Assuming you don't have favorite info in UserModel
+
+      if (_avatarController.text.isNotEmpty) {
+        // Load the image from the network using a package like CachedNetworkImage
+        // Set _image accordingly
       }
     }
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (widget.mycontact != null) {
-      _refreshData();
-    }
-  }
-
-  void _refreshData() async {
-    // Call DBHelper.readContacts() to get the updated data
-    List<Mycontact> updatedContacts = await DBHelper.readContacts();
-
-    // Find the updated contact from the list based on ID
-    Mycontact updatedContact = updatedContacts.firstWhere(
-      (contact) => contact.id == widget.mycontact!.id,
-    );
-
-    setState(() {
-      // Update the state with the new data
-      _fullnameController.text = updatedContact.fullname;
-      _emailController.text = updatedContact.email;
-
-      // Update the profile image
-      if (updatedContact.profileImage != null &&
-          updatedContact.profileImage!.isNotEmpty) {
-        _image = File(updatedContact.profileImage!);
-        _profileImageController.text = updatedContact.profileImage!;
-      } else {
-        // Handle the case where the profile image is empty or null
-        _image = null;
-        _profileImageController.text = '';
-      }
-
-      // Update the favorite status
-      _isFavoriteController.text = updatedContact.isFavorite ?? '';
-    });
   }
 
   @override
@@ -85,7 +57,7 @@ class _ProfileContactState extends State<ProfileContact> {
     _lastnameController.dispose();
     _fullnameController.dispose();
     _emailController.dispose();
-    _profileImageController.dispose();
+    _avatarController.dispose();
     _isFavoriteController.dispose();
     super.dispose();
   }
@@ -94,16 +66,16 @@ class _ProfileContactState extends State<ProfileContact> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: buildAppBar(),
-      body: buildbody(context),
+      body: buildBody(context),
     );
   }
 
-  SingleChildScrollView buildbody(BuildContext context) {
+  SingleChildScrollView buildBody(BuildContext context) {
     return SingleChildScrollView(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          builEditContact(),
+          buildEditContact(),
           const SizedBox(height: 10),
           _buildAvatar(),
           _buildTextField(_fullnameController),
@@ -162,11 +134,11 @@ class _ProfileContactState extends State<ProfileContact> {
     );
   }
 
-  Widget builEditContact() {
+  Widget buildEditContact() {
     return GestureDetector(
       onTap: () async {
         final result = await Navigator.of(context).push(MaterialPageRoute(
-          builder: (_) => AddEditContacts(mycontact: widget.mycontact),
+          builder: (_) => AddEditContacts(user: widget.user),
         ));
 
         print('Result from AddEditContacts: $result');
@@ -194,6 +166,33 @@ class _ProfileContactState extends State<ProfileContact> {
         ),
       ),
     );
+  }
+
+  void _refreshData() async {
+    try {
+      // Fetch the updated user data from the API using the user ID
+      if (widget.user != null) {
+        UserModel updatedUser = await APIService.getUserById(widget.user!.id);
+
+        setState(() {
+          // Update the state with the new data
+          _firstnameController.text = updatedUser.firstName;
+          _lastnameController.text = updatedUser.lastName;
+          _fullnameController.text =
+              "${updatedUser.firstName} ${updatedUser.lastName}";
+          _emailController.text = updatedUser.email;
+          _avatarController.text = updatedUser.avatar;
+
+          if (_avatarController.text.isNotEmpty) {
+            // Load the image from the network using a package like CachedNetworkImage
+            // Set _image accordingly
+          }
+        });
+      }
+    } catch (e) {
+      print('Error refreshing data: $e');
+      // Handle the error as needed
+    }
   }
 
   void _showSnackBar(
@@ -240,11 +239,17 @@ class _ProfileContactState extends State<ProfileContact> {
                       (_isFavoriteController.text == '1') ? '0' : '1';
                 });
 
-                // Save the updated isFavorite status to the database
-                await DBHelper.updateContactFavoriteStatus(
-                  widget.mycontact!.id!,
-                  _isFavoriteController.text,
-                );
+                // TODO: Implement the logic to update favorite status through API
+                // await APIService.updateUser(widget.user!.id, UserModel(
+                //   id: widget.user!.id,
+                //   firstName: widget.user!.firstName,
+                //   lastName: widget.user!.lastName,
+                //   email: widget.user!.email,
+                //   avatar: widget.user!.avatar,
+                // ));
+
+                // For now, you can print the new status
+                print('Favorite Status Updated: ${_isFavoriteController.text}');
               },
             ),
           ),

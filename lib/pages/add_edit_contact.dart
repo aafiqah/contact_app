@@ -1,13 +1,13 @@
-import 'package:contact_app/helper.dart';
-import 'package:contact_app/mycontact.dart';
-import 'package:flutter/material.dart';
 import 'dart:io';
+import 'package:contact_app/api/api_service.dart'; // Import your API service
+import 'package:contact_app/api/user_model.dart';
+import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 class AddEditContacts extends StatefulWidget {
-  const AddEditContacts({Key? key, this.mycontact}) : super(key: key);
+  const AddEditContacts({Key? key, this.user}) : super(key: key);
 
-  final Mycontact? mycontact;
+  final UserModel? user;
 
   @override
   State<AddEditContacts> createState() => _AddEditState();
@@ -17,26 +17,23 @@ class _AddEditState extends State<AddEditContacts> {
   final _firstnameController = TextEditingController();
   final _lastnameController = TextEditingController();
   final _emailController = TextEditingController();
-  final _profileImageController = TextEditingController();
-  final _isFavoriteController = TextEditingController();
+  final _avatarController = TextEditingController();
 
   File? _image;
 
   @override
   void initState() {
     super.initState();
-    if (widget.mycontact != null) {
-      _firstnameController.text = widget.mycontact!.firstname;
-      _lastnameController.text = widget.mycontact!.lastname;
-      _emailController.text = widget.mycontact!.email;
-      _profileImageController.text = widget.mycontact!.profileImage ?? '';
+    if (widget.user != null) {
+      _firstnameController.text = widget.user!.firstName;
+      _lastnameController.text = widget.user!.lastName;
+      _emailController.text = widget.user!.email;
+      _avatarController.text = widget.user!.avatar;
 
-       // Load the profile image if it exists
-      if (_profileImageController.text.isNotEmpty) {
-        _image = File(_profileImageController.text);
+      // Load the profile image if it exists
+      if (_avatarController.text.isNotEmpty) {
+        // You can load the image from the network using a package like CachedNetworkImage
       }
-
-     _isFavoriteController.text = widget.mycontact!.isFavorite ?? '';
     }
   }
 
@@ -45,8 +42,7 @@ class _AddEditState extends State<AddEditContacts> {
     _firstnameController.dispose();
     _lastnameController.dispose();
     _emailController.dispose();
-    _profileImageController.dispose();
-    _isFavoriteController.dispose();
+    _avatarController.dispose();
     super.dispose();
   }
 
@@ -103,16 +99,14 @@ class _AddEditState extends State<AddEditContacts> {
             right: -12,
             child: IconButton(
               icon: const Icon(
-                    Icons.edit,
-                    color: Colors.green,
+                Icons.edit,
+                color: Colors.green,
               ),
               onPressed: () {
-                setState(() {
-                  
-                });
+                setState(() {});
               },
             ),
-          ),          
+          ),
         ],
       ),
     );
@@ -147,22 +141,25 @@ class _AddEditState extends State<AddEditContacts> {
       width: double.infinity,
       child: ElevatedButton(
         onPressed: () async {
-          if (widget.mycontact != null) {
-            await DBHelper.updateContacts(Mycontact(
-              id: widget.mycontact!.id,
-              firstname: _firstnameController.text,
-              lastname: _lastnameController.text,
-              email: _emailController.text,
-              profileImage: _profileImageController.text, 
-            ));
+          if (widget.user != null) {
+            await APIService.updateUser(
+              widget.user!.id,
+              UserModel(
+                id: widget.user!.id,
+                firstName: _firstnameController.text,
+                lastName: _lastnameController.text,
+                email: _emailController.text,
+                avatar: _avatarController.text,
+              ),
+            );
             Navigator.of(context).pop(true);
           } else {
-            await DBHelper.createContacts(Mycontact(
-              firstname: _firstnameController.text,
-              lastname: _lastnameController.text,
+            await APIService.createUser(UserModel(
+              id: 0,
+              firstName: _firstnameController.text,
+              lastName: _lastnameController.text,
               email: _emailController.text,
-              profileImage: _profileImageController.text,
-              isFavorite: _isFavoriteController.text,      
+              avatar: _avatarController.text,
             ));
             Navigator.of(context).pop(true);
           }
@@ -184,7 +181,7 @@ class _AddEditState extends State<AddEditContacts> {
   }
 
   AppBar buildAppBar(BuildContext context) {
-    String title = widget.mycontact != null ? 'Edit Contact' : 'Add Contact';
+    String title = widget.user != null ? 'Edit Contact' : 'Add Contact';
 
     return AppBar(
       title: Text(
@@ -216,8 +213,8 @@ class _AddEditState extends State<AddEditContacts> {
       print('Selected Image Path: ${image.path}');
       setState(() {
         _image = File(image.path);
-        _profileImageController.text = image.path;
-        print('Profile Image Controller: ${_profileImageController.text}');
+        _avatarController.text = image.path;
+        print('Profile Image Controller: ${_avatarController.text}');
       });
     }
   }
