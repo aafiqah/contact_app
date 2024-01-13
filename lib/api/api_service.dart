@@ -7,7 +7,7 @@ class APIService {
 
   // Fetch a list of users
   static Future<List<UserModel>> getUsers() async {
-    final response = await http.get(Uri.parse('$baseUrl?page=1'));
+    final response = await http.get(Uri.parse('$baseUrl?page=1&per_page=12'));
 
     if (response.statusCode == 200) {
       Iterable data = json.decode(response.body)['data'];
@@ -17,15 +17,21 @@ class APIService {
     }
   }
 
-  // Fetch a list of favourite users
-  static Future<List<UserModel>> getFavoriteUsers() async {
-    final response = await http.get(Uri.parse('$baseUrl?page=2'));
+  // Get a single user by ID
+  static Future<UserModel> getUserById(int userId) async {
+    String url = "$baseUrl/$userId";
+
+    final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
-      Iterable data = json.decode(response.body)['data'];
-      return List<UserModel>.from(data.map((user) => UserModel.fromJson(user)));
+      Map<String, dynamic> json = jsonDecode(response.body);
+      UserModel user = UserModel.fromJson(json['data']);
+      return user;
+    } else if (response.statusCode == 404) {
+      throw Exception('User not found');
     } else {
-      throw Exception('Failed to load favorite users');
+      throw Exception(
+          'Failed to load user. Status Code: ${response.statusCode}');
     }
   }
 
@@ -40,16 +46,20 @@ class APIService {
     if (response.statusCode == 201) {
       return UserModel.fromJson(json.decode(response.body)['data']);
     } else {
-      throw Exception('Failed to create user');
+      throw Exception(
+          'Failed to create user. Status Code: ${response.statusCode}');
     }
   }
 
   // Delete a user by ID
   static Future<void> deleteUser(int id) async {
-    final response = await http.delete(Uri.parse('$baseUrl/$id'));
+    final response = await http.delete(
+      Uri.parse('$baseUrl/$id'),
+    );
 
     if (response.statusCode != 204) {
-      throw Exception('Failed to delete user');
+      throw Exception(
+          'Failed to delete user. Status Code: ${response.statusCode}');
     }
   }
 
@@ -64,22 +74,8 @@ class APIService {
     if (response.statusCode == 200) {
       return UserModel.fromJson(json.decode(response.body)['data']);
     } else {
-      throw Exception('Failed to update user');
-    }
-  }
-
-  // Get a single user by ID
-  static Future<UserModel> getUserById(int userId) async {
-    String url = "$baseUrl/$userId";
-
-    final response = await http.get(Uri.parse(url));
-
-    if (response.statusCode == 200) {
-      Map<String, dynamic> json = jsonDecode(response.body);
-      UserModel user = UserModel.fromJson(json['data']);
-      return user;
-    } else {
-      throw Exception('Failed to load user');
+      throw Exception(
+          'Failed to update user. Status Code: ${response.statusCode}');
     }
   }
 }

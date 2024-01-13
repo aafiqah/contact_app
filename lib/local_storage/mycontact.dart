@@ -1,37 +1,36 @@
+// mycontact.dart
 class Mycontact {
   int? id;
-  String firstname;
-  String lastname;
-  String fullname;
+  String firstName;
+  String lastName;
   String email;
-  String? profileImage;
+  String? avatar;
   String? isFavorite;
 
   Mycontact({
-    this.id, 
-    required this.firstname, 
-    required this.lastname, 
+    this.id,
+    required this.firstName,
+    required this.lastName,
     required this.email,
-    this.profileImage,
+    this.avatar,
     this.isFavorite,
-  }) : fullname = '$firstname $lastname';
+  });
 
   factory Mycontact.fromJson(Map<String, dynamic> json) => Mycontact(
         id: json['id'],
-        firstname: json['firstname'],
-        lastname: json['lastname'],
+        firstName: json['first_name'],
+        lastName: json['last_name'],
         email: json['email'],
-        profileImage: json['profileImage'],
+        avatar: json['avatar'],
         isFavorite: json['isFavorite'],
       );
 
   Map<String, dynamic> toJson() => {
         'id': id,
-        'firstname': firstname,
-        'lastname': lastname,
-        'fullname': fullname,
+        'first_name': firstName,
+        'last_name': lastName,
         'email': email,
-        'profileImage': profileImage,
+        'avatar': avatar,
         'isFavorite': isFavorite,
       };
 }

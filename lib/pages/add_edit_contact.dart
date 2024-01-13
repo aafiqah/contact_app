@@ -1,13 +1,14 @@
-import 'dart:io';
-import 'package:contact_app/api/api_service.dart'; // Import your API service
-import 'package:contact_app/api/user_model.dart';
+import 'package:contact_app/local_storage/helper.dart';
+import 'package:contact_app/local_storage/mycontact.dart';
+
 import 'package:flutter/material.dart';
+import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 
 class AddEditContacts extends StatefulWidget {
-  const AddEditContacts({Key? key, this.user}) : super(key: key);
+  const AddEditContacts({Key? key, this.mycontact}) : super(key: key);
 
-  final UserModel? user;
+  final Mycontact? mycontact;
 
   @override
   State<AddEditContacts> createState() => _AddEditState();
@@ -17,23 +18,20 @@ class _AddEditState extends State<AddEditContacts> {
   final _firstnameController = TextEditingController();
   final _lastnameController = TextEditingController();
   final _emailController = TextEditingController();
-  final _avatarController = TextEditingController();
+  final _avatarImageController = TextEditingController();
+  final _isFavoriteController = TextEditingController();
 
   File? _image;
 
   @override
   void initState() {
     super.initState();
-    if (widget.user != null) {
-      _firstnameController.text = widget.user!.firstName;
-      _lastnameController.text = widget.user!.lastName;
-      _emailController.text = widget.user!.email;
-      _avatarController.text = widget.user!.avatar;
-
-      // Load the profile image if it exists
-      if (_avatarController.text.isNotEmpty) {
-        // You can load the image from the network using a package like CachedNetworkImage
-      }
+    if (widget.mycontact != null) {
+      _firstnameController.text = widget.mycontact!.firstName;
+      _lastnameController.text = widget.mycontact!.lastName;
+      _emailController.text = widget.mycontact!.email;
+      _avatarImageController.text = widget.mycontact!.avatar ?? '';
+     _isFavoriteController.text = widget.mycontact!.isFavorite ?? '';
     }
   }
 
@@ -42,7 +40,8 @@ class _AddEditState extends State<AddEditContacts> {
     _firstnameController.dispose();
     _lastnameController.dispose();
     _emailController.dispose();
-    _avatarController.dispose();
+    _avatarImageController.dispose();
+    _isFavoriteController.dispose();
     super.dispose();
   }
 
@@ -81,32 +80,43 @@ class _AddEditState extends State<AddEditContacts> {
       child: Stack(
         children: [
           CircleAvatar(
-            radius: 50,
-            backgroundColor: Colors.grey[300],
-            child: _image != null
-                ? ClipOval(
-                    child: Image.file(
-                      _image!,
-                      width: 100,
-                      height: 100,
-                      fit: BoxFit.cover,
-                    ),
-                  )
-                : const Icon(Icons.camera_alt),
-          ),
+          radius: 50,
+          backgroundColor: Colors.grey[300],
+          child: _image != null
+              ? ClipOval(
+                  child: Image.file(
+                    _image!,
+                    width: 100,
+                    height: 100,
+                    fit: BoxFit.cover,
+                  ),
+                )
+              : (_avatarImageController.text.isNotEmpty
+                  ? ClipOval(
+                      child: Image.network(
+                        _avatarImageController.text,
+                        width: 100,
+                        height: 100,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : const Icon(Icons.camera_alt)),
+        ),
           Positioned(
             bottom: 2,
             right: -12,
             child: IconButton(
               icon: const Icon(
-                Icons.edit,
-                color: Colors.green,
+                    Icons.edit,
+                    color: Colors.green,
               ),
               onPressed: () {
-                setState(() {});
+                setState(() {
+                  
+                });
               },
             ),
-          ),
+          ),          
         ],
       ),
     );
@@ -141,25 +151,22 @@ class _AddEditState extends State<AddEditContacts> {
       width: double.infinity,
       child: ElevatedButton(
         onPressed: () async {
-          if (widget.user != null) {
-            await APIService.updateUser(
-              widget.user!.id,
-              UserModel(
-                id: widget.user!.id,
-                firstName: _firstnameController.text,
-                lastName: _lastnameController.text,
-                email: _emailController.text,
-                avatar: _avatarController.text,
-              ),
-            );
-            Navigator.of(context).pop(true);
-          } else {
-            await APIService.createUser(UserModel(
-              id: 0,
+          if (widget.mycontact != null) {
+            await DBHelper.updateContacts(Mycontact(
+              id: widget.mycontact!.id,
               firstName: _firstnameController.text,
               lastName: _lastnameController.text,
               email: _emailController.text,
-              avatar: _avatarController.text,
+              avatar: _avatarImageController.text, 
+            ));
+            Navigator.of(context).pop(true);
+          } else {
+            await DBHelper.createContacts(Mycontact(
+              firstName: _firstnameController.text,
+              lastName: _lastnameController.text,
+              email: _emailController.text,
+              avatar: _avatarImageController.text,
+              isFavorite: _isFavoriteController.text,      
             ));
             Navigator.of(context).pop(true);
           }
@@ -181,7 +188,7 @@ class _AddEditState extends State<AddEditContacts> {
   }
 
   AppBar buildAppBar(BuildContext context) {
-    String title = widget.user != null ? 'Edit Contact' : 'Add Contact';
+    String title = widget.mycontact != null ? 'Edit Contact' : 'Add Contact';
 
     return AppBar(
       title: Text(
@@ -213,8 +220,8 @@ class _AddEditState extends State<AddEditContacts> {
       print('Selected Image Path: ${image.path}');
       setState(() {
         _image = File(image.path);
-        _avatarController.text = image.path;
-        print('Profile Image Controller: ${_avatarController.text}');
+        _avatarImageController.text = image.path;
+        print('Profile Image Controller: ${_avatarImageController.text}');
       });
     }
   }
