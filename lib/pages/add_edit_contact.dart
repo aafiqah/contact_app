@@ -31,7 +31,7 @@ class _AddEditState extends State<AddEditContacts> {
       _lastnameController.text = widget.mycontact!.lastName;
       _emailController.text = widget.mycontact!.email;
       _avatarImageController.text = widget.mycontact!.avatar ?? '';
-     _isFavoriteController.text = widget.mycontact!.isFavorite ?? '';
+      _isFavoriteController.text = widget.mycontact!.isFavorite ?? '';
     }
   }
 
@@ -79,44 +79,71 @@ class _AddEditState extends State<AddEditContacts> {
       height: 120,
       child: Stack(
         children: [
-          CircleAvatar(
-          radius: 50,
-          backgroundColor: Colors.grey[300],
-          child: _image != null
-              ? ClipOval(
-                  child: Image.file(
-                    _image!,
-                    width: 100,
-                    height: 100,
-                    fit: BoxFit.cover,
-                  ),
-                )
-              : (_avatarImageController.text.isNotEmpty
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: const Color(
+                    0xFF32BAA5), // Set your desired border color here
+                width: 5.0, // Set the width of the border
+              ),
+            ),
+            child: CircleAvatar(
+              radius: 50,
+              backgroundColor: Colors.grey[300],
+              child: _image != null
                   ? ClipOval(
-                      child: Image.network(
-                        _avatarImageController.text,
+                      child: Image.file(
+                        _image!,
                         width: 100,
                         height: 100,
                         fit: BoxFit.cover,
                       ),
                     )
-                  : const Icon(Icons.camera_alt)),
-        ),
-          Positioned(
-            bottom: 2,
-            right: -12,
-            child: IconButton(
-              icon: const Icon(
-                    Icons.edit,
-                    color: Colors.green,
-              ),
-              onPressed: () {
-                setState(() {
-                  
-                });
-              },
+                  : (_avatarImageController.text.isNotEmpty
+                      ? ClipOval(
+                          child: Image.network(
+                            _avatarImageController.text,
+                            width: 100,
+                            height: 100,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      : const Icon(Icons.camera_alt)),
             ),
-          ),          
+          ),
+          Positioned(
+            bottom: 6,
+            right: 2,
+            child: Container(
+              width: 30.0, // Set the desired width of the circle
+              height: 30.0, // Set the desired height of the circle
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: Color(0xFF32BAA5), // Set the desired background color
+              ),
+              child: IconButton(
+                icon: const Icon(
+                  Icons.edit,
+                  color: Colors.white,
+                  size: 15.0,
+                ),
+                onPressed: () async {
+                  // Update the favorite status
+                  setState(() {
+                    _isFavoriteController.text =
+                        (_isFavoriteController.text == '1') ? '0' : '1';
+                  });
+
+                  // Save the updated isFavorite status to the database
+                  await DBHelper.updateContactFavoriteStatus(
+                    widget.mycontact!.id!,
+                    _isFavoriteController.text,
+                  );
+                },
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -139,16 +166,23 @@ class _AddEditState extends State<AddEditContacts> {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(30.0),
           borderSide: const BorderSide(
-            color: Color.fromARGB(255, 50, 186, 165),
+            color: Color(0xFF32BAA5),
           ),
         ),
       ),
+      style: const TextStyle(
+              color: Colors.black,
+              fontSize: 14,
+              fontFamily: 'Montserrat',
+              fontWeight: FontWeight.w400,
+            ),
     );
   }
 
   Widget _buildElevatedButton(BuildContext context) {
     return SizedBox(
-      width: double.infinity,
+      width: 360,
+      height: 50,
       child: ElevatedButton(
         onPressed: () async {
           if (widget.mycontact != null) {
@@ -157,7 +191,7 @@ class _AddEditState extends State<AddEditContacts> {
               firstName: _firstnameController.text,
               lastName: _lastnameController.text,
               email: _emailController.text,
-              avatar: _avatarImageController.text, 
+              avatar: _avatarImageController.text,
             ));
             Navigator.of(context).pop(true);
           } else {
@@ -166,22 +200,24 @@ class _AddEditState extends State<AddEditContacts> {
               lastName: _lastnameController.text,
               email: _emailController.text,
               avatar: _avatarImageController.text,
-              isFavorite: _isFavoriteController.text,      
+              isFavorite: _isFavoriteController.text,
             ));
             Navigator.of(context).pop(true);
           }
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color.fromARGB(255, 50, 186, 165),
+          backgroundColor: const Color(0xFF32BAA5),
           padding: const EdgeInsets.all(15),
         ),
         child: const Text(
           'Done',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+           style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontFamily: 'Raleway',
+              fontWeight: FontWeight.w500,
+              height: 0.09,
+            ),
         ),
       ),
     );
@@ -194,12 +230,13 @@ class _AddEditState extends State<AddEditContacts> {
       title: Text(
         title,
         style: const TextStyle(
-          color: Colors.white,
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      backgroundColor: const Color.fromARGB(255, 50, 186, 165),
+            color: Colors.white,
+            fontSize: 20,
+            fontFamily: 'Raleway',
+            fontWeight: FontWeight.w700,
+            height: 0),
+      ),      
+      backgroundColor: const Color(0xFF32BAA5),
       elevation: 0.0,
       centerTitle: true,
       leading: IconButton(

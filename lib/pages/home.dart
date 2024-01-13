@@ -21,6 +21,7 @@ class _HomePageState extends State<HomePage> {
   String selectedCategory = 'all'; // Initial selected category
 
   TextEditingController searchController = TextEditingController();
+  String searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +33,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget buildBody() {
+    searchQuery = searchController.text.toLowerCase();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -84,8 +86,16 @@ class _HomePageState extends State<HomePage> {
               child: CircularProgressIndicator(),
             );
           } else if (localSnapshot.hasData && localSnapshot.data!.isNotEmpty) {
-            // Display data from local storage
-            return displayContactList(localSnapshot.data!);
+            // Filter contacts based on searchQuery
+            List<Mycontact> filteredContacts = localSnapshot.data!
+                .where((contact) =>
+                    contact.firstName.toLowerCase().contains(searchQuery) ||
+                    contact.lastName.toLowerCase().contains(searchQuery) ||
+                    contact.email.toLowerCase().contains(searchQuery))
+                .toList();
+
+            // Display filtered data from local storage
+            return displayContactList(filteredContacts);
           } else {
             // Fetch data from the remote API
             return FutureBuilder<List<UserModel>>(
@@ -111,7 +121,7 @@ class _HomePageState extends State<HomePage> {
                   // Save new contacts to local storage
                   DBHelper.createContactsFromRemote(newContacts);
 
-                  // Display data from local storage
+                  // Display filtered data from local storage
                   return FutureBuilder<List<Mycontact>>(
                     future: DBHelper.readContacts(),
                     builder: (BuildContext context,
@@ -122,7 +132,22 @@ class _HomePageState extends State<HomePage> {
                         );
                       } else if (snapshot.hasData &&
                           snapshot.data!.isNotEmpty) {
-                        return displayContactList(snapshot.data!);
+                        // Filter contacts based on searchQuery
+                        List<Mycontact> filteredContacts = snapshot.data!
+                            .where((contact) =>
+                                contact.firstName
+                                    .toLowerCase()
+                                    .contains(searchQuery) ||
+                                contact.lastName
+                                    .toLowerCase()
+                                    .contains(searchQuery) ||
+                                contact.email
+                                    .toLowerCase()
+                                    .contains(searchQuery))
+                            .toList();
+
+                        // Display filtered data from local storage
+                        return displayContactList(filteredContacts);
                       } else {
                         // No data in local storage after fetching from remote
                         return Column(
@@ -207,7 +232,7 @@ class _HomePageState extends State<HomePage> {
                         foregroundColor:
                             const Color.fromRGBO(242, 201, 76, 100),
                         icon: Icons.edit,
-                        padding: const EdgeInsets.all(0.0),
+                        padding: const EdgeInsets.all(0.0),                        
                       ),
                       SlidableAction(
                         onPressed: (context) => deleteContact(mycontact),
@@ -260,7 +285,7 @@ class _HomePageState extends State<HomePage> {
             'No list of Contacts here\nAdd Contact Now',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Color.fromARGB(255, 15, 15, 15),
+              color: Colors.black,
               fontSize: 14,
             ),
           ),
@@ -274,7 +299,7 @@ class _HomePageState extends State<HomePage> {
   Widget displayContactList(List<Mycontact> contacts) {
     return ListView.separated(
       separatorBuilder: (BuildContext context, int index) =>
-          const SizedBox(height: 15),
+          const SizedBox(height: 12),
       itemCount: contacts.length,
       itemBuilder: (BuildContext context, int index) {
         Mycontact mycontact = contacts[index];
@@ -405,16 +430,26 @@ class _HomePageState extends State<HomePage> {
   ListTile buildContactListTile(Mycontact mycontact) {
     return ListTile(
       leading: CircleAvatar(
-      radius: 30,
-      backgroundImage: mycontact.avatar != null
-          ? (mycontact.avatar!.startsWith('http') || mycontact.avatar!.startsWith('https'))
-              ? NetworkImage(mycontact.avatar!)
-              : AssetImage(mycontact.avatar!) as ImageProvider
-          : const AssetImage('assets/icons/Profile.svg'),
-    ),
+        radius: 27,
+        backgroundImage: mycontact.avatar != null
+            ? (mycontact.avatar!.startsWith('http') ||
+                    mycontact.avatar!.startsWith('https'))
+                ? NetworkImage(mycontact.avatar!)
+                : AssetImage(mycontact.avatar!) as ImageProvider
+            : const AssetImage('assets/icons/Profile.svg'),
+      ),
       title: Row(
         children: [
-          Text('${mycontact.firstName} ${mycontact.lastName}'),
+          Text(
+            '${mycontact.firstName} ${mycontact.lastName}',
+            style: const TextStyle(
+              color: Color(0xFF1B1A57),
+              fontSize: 14,
+              fontFamily: 'Raleway',
+              fontWeight: FontWeight.w600,
+              height: 0,
+            ),
+          ),
           const SizedBox(width: 8),
           if (mycontact.isFavorite == '1')
             const Icon(
@@ -423,16 +458,28 @@ class _HomePageState extends State<HomePage> {
             ),
         ],
       ),
-      subtitle: Text(mycontact.email),
+      subtitle: Text(
+        mycontact.email,
+        style: const TextStyle(
+          color: Color(0xFF4E5D7B),
+          fontSize: 12,
+          fontFamily: 'Lato',
+          fontWeight: FontWeight.w400,
+          height: 0.12,
+        ),
+      ),
       onTap: () {},
       trailing: IconButton(
-        icon: Image.asset('assets/images/Send.png'),
+        icon: Image.asset(
+          'assets/images/Send.png',
+          height: 27, // Adjust the height as needed
+          width: 23, // Adjust the width as needed
+        ),
         onPressed: () async {
           await Navigator.of(context).push(MaterialPageRoute(
             builder: (_) => ProfileContact(mycontact: mycontact),
           ));
-
-// This will be executed when ProfileContact is popped
+          // This will be executed when ProfileContact is popped
           refreshHomePage();
         },
       ),
@@ -443,7 +490,7 @@ class _HomePageState extends State<HomePage> {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         backgroundColor: selectedCategory == 'favourite'
-            ? const Color.fromARGB(255, 50, 186, 165)
+            ? const Color(0xFF32BAA5)
             : Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(5),
@@ -459,9 +506,13 @@ class _HomePageState extends State<HomePage> {
       child: Text(
         searchText,
         style: TextStyle(
+          fontSize: 14,
+          fontFamily: 'Raleway',
+          fontWeight: FontWeight.w600,
+          height: 0.12,
           color: selectedCategory == 'favourite'
               ? Colors.white
-              : const Color.fromARGB(255, 50, 186, 165),
+              : const Color(0xFF32BAA5),
         ),
       ),
     );
@@ -470,9 +521,8 @@ class _HomePageState extends State<HomePage> {
   Widget _allContacts(String searchText) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: selectedCategory == 'all'
-            ? const Color.fromARGB(255, 50, 186, 165)
-            : Colors.white,
+        backgroundColor:
+            selectedCategory == 'all' ? const Color(0xFF32BAA5) : Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(5),
         ),
@@ -487,9 +537,13 @@ class _HomePageState extends State<HomePage> {
       child: Text(
         searchText,
         style: TextStyle(
+          fontSize: 14,
+          fontFamily: 'Raleway',
+          fontWeight: FontWeight.w600,
+          height: 0.12,
           color: selectedCategory == 'all'
               ? Colors.white
-              : const Color.fromARGB(255, 50, 186, 165),
+              : const Color(0xFF32BAA5),
         ),
       ),
     );
@@ -520,7 +574,12 @@ class _HomePageState extends State<HomePage> {
           fillColor: Colors.white,
           contentPadding: const EdgeInsets.all(15),
           hintText: 'Search',
-          hintStyle: const TextStyle(color: Color(0xffDDDADA), fontSize: 14),
+          hintStyle: const TextStyle(
+              color: Color(0xFF999999),
+              fontSize: 16,
+              fontFamily: 'Gilroy',
+              fontWeight: FontWeight.w300,
+              height: 0.09),
           suffixIcon: searchController.text.isNotEmpty
               ? IconButton(
                   icon: const Icon(Icons.clear),
@@ -564,12 +623,13 @@ class _HomePageState extends State<HomePage> {
       title: const Text(
         'My Contacts',
         style: TextStyle(
-          color: Colors.white,
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-        ),
+            color: Colors.white,
+            fontSize: 20,
+            fontFamily: 'Raleway',
+            fontWeight: FontWeight.w700,
+            height: 0),
       ),
-      backgroundColor: const Color.fromARGB(255, 50, 186, 165),
+      backgroundColor: const Color(0xFF32BAA5),
       elevation: 0.0,
       centerTitle: true,
       actions: [
@@ -602,7 +662,7 @@ class _HomePageState extends State<HomePage> {
             currentContent = 'nodata';
           });
         },
-        backgroundColor: const Color.fromARGB(255, 50, 186, 165),
+        backgroundColor: const Color(0xFF32BAA5),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(50.0),
         ),
@@ -620,6 +680,9 @@ class _HomePageState extends State<HomePage> {
       selectedCategory = 'all';
       currentContent = 'alllist';
     });
+
+    // Manually trigger fetching and displaying all data
+    setState(() {});
   }
 
   void navigateToDetail() {

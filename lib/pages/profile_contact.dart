@@ -112,10 +112,12 @@ class _ProfileContactState extends State<ProfileContact> {
         child: Text(
           controller.text,
           style: const TextStyle(
-            fontSize: 16,
-            color: Colors.black,
-            fontWeight: FontWeight.w500,
-          ),
+              color: Colors.black,
+              fontSize: 14,
+              fontFamily: 'Montserrat',
+              fontWeight: FontWeight.w500,
+              height: 0,
+            ),
         ),
       ),
     );
@@ -123,25 +125,28 @@ class _ProfileContactState extends State<ProfileContact> {
 
   Widget buildSendEmailField(TextEditingController controller) {
     return Container(
-      color: Colors.grey[300],
+      color: const Color(0xFFF1F1F1),
       padding: const EdgeInsets.all(8.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Image.asset(
             'assets/images/Emel.png',
-            height: 50,
-            width: 50,
+            height: 30.93,
+            width: 44,
           ),
-          const SizedBox(height: 3),
+          const SizedBox(height: 14),
           Align(
             alignment: Alignment.center,
             child: Text(
               controller.text,
               style: const TextStyle(
-                fontSize: 16,
-                color: Colors.black,
-              ),
+              color: Colors.black,
+              fontSize: 14,
+              fontFamily: 'Montserrat',
+              fontWeight: FontWeight.w400,
+              height: 0,
+            ),
             ),
           ),
           const SizedBox(height: 3),
@@ -177,6 +182,8 @@ class _ProfileContactState extends State<ProfileContact> {
             style: TextStyle(
               color: Color(0xFF32BAA5),
               fontSize: 16,
+              fontFamily: 'Raleway',
+              fontWeight: FontWeight.w500,
             ),
           ),
         ),
@@ -191,69 +198,80 @@ class _ProfileContactState extends State<ProfileContact> {
   }
 
   Widget _buildAvatar() {
-  return SizedBox(
-    height: 120,
-    child: Stack(
-      children: [
-        CircleAvatar(
-          radius: 50,
-          backgroundColor: Colors.grey[300],
-          child: _image != null
-              ? ClipOval(
-                  child: Image.file(
-                    _image!,
-                    width: 100,
-                    height: 100,
-                    fit: BoxFit.cover,
-                  ),
-                )
-              : (_avatarImageController.text.isNotEmpty
+    return SizedBox(
+      height: 120,
+      child: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: const Color(0xFF32BAA5), // Set your desired border color here
+                width: 5.0, // Set the width of the border
+              ),
+            ),
+            child: CircleAvatar(
+              radius: 50,
+              backgroundColor: Colors.grey[300],
+              child: _image != null
                   ? ClipOval(
-                      child: Image.network(
-                        _avatarImageController.text,
+                      child: Image.file(
+                        _image!,
                         width: 100,
                         height: 100,
                         fit: BoxFit.cover,
                       ),
                     )
-                  : const Icon(Icons.camera_alt)),
-        ),
-        Positioned(
-          bottom: 2,
-          right: -12,
-          child: IconButton(
-            icon: Icon(
-              _isFavoriteController.text == '1'
-                  ? Icons.star
-                  : Icons.star_border,
-              color: _isFavoriteController.text == '1'
-                  ? Colors.yellow
-                  : Colors.grey,
+                  : (_avatarImageController.text.isNotEmpty
+                      ? ClipOval(
+                          child: Image.network(
+                            _avatarImageController.text,
+                            width: 100,
+                            height: 100,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      : const Icon(Icons.camera_alt)),
             ),
-            onPressed: () async {
-              // Update the favorite status
-              setState(() {
-                _isFavoriteController.text =
-                    (_isFavoriteController.text == '1') ? '0' : '1';
-              });
-
-              // Save the updated isFavorite status to the database
-              await DBHelper.updateContactFavoriteStatus(
-                widget.mycontact!.id!,
-                _isFavoriteController.text,
-              );
-            },
           ),
-        ),
-      ],
-    ),
-  );
-}
+          Positioned(
+            bottom: -3,
+            right: -6,
+            child: IconButton(
+              icon: Icon(
+                _isFavoriteController.text == '1'
+                    ? Icons.star
+                    : Icons.star_border,
+                color: _isFavoriteController.text == '1'
+                    ? Colors.yellow
+                    : Colors.grey,
+                size: 35.0,
+              ),
+              onPressed: () async {
+                // Update the favorite status
+                setState(() {
+                  _isFavoriteController.text =
+                      (_isFavoriteController.text == '1') ? '0' : '1';
+                });
+
+                // Save the updated isFavorite status to the database
+                await DBHelper.updateContactFavoriteStatus(
+                  widget.mycontact!.id!,
+                  _isFavoriteController.text,
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildElevatedButton(
       BuildContext context, TextEditingController emailController) {
     return SizedBox(
-      width: 300,
+      width: 360,
+      height: 50,
       child: ElevatedButton(
         onPressed: () async {
           String? encodeQueryParameters(Map<String, String> params) {
@@ -279,16 +297,18 @@ class _ProfileContactState extends State<ProfileContact> {
           }
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color.fromARGB(255, 50, 186, 165),
+          backgroundColor: const Color(0xFF32BAA5),
           padding: const EdgeInsets.all(15),
         ),
         child: const Text(
           'Send Email',
           style: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+              color: Colors.white,
+              fontSize: 16,
+              fontFamily: 'Raleway',
+              fontWeight: FontWeight.w500,
+              height: 0.09,
+            ),
         ),
       ),
     );
@@ -299,12 +319,13 @@ class _ProfileContactState extends State<ProfileContact> {
       title: const Text(
         "Profile",
         style: TextStyle(
-          color: Colors.white,
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-        ),
+            color: Colors.white,
+            fontSize: 20,
+            fontFamily: 'Raleway',
+            fontWeight: FontWeight.w700,
+            height: 0),
       ),
-      backgroundColor: const Color.fromARGB(255, 50, 186, 165),
+      backgroundColor: const Color(0xFF32BAA5),
       elevation: 0.0,
       centerTitle: true,
       leading: IconButton(
@@ -318,6 +339,5 @@ class _ProfileContactState extends State<ProfileContact> {
       ),
     );
   }
-  
-  
+    
 }
