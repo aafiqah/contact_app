@@ -30,7 +30,8 @@ class _ProfileContactState extends State<ProfileContact> {
     if (widget.mycontact != null) {
       _firstnameController.text = widget.mycontact!.firstName;
       _lastnameController.text = widget.mycontact!.lastName;
-      _fullnameController.text = '${widget.mycontact!.firstName} ${widget.mycontact!.lastName}';
+      _fullnameController.text =
+          '${widget.mycontact!.firstName} ${widget.mycontact!.lastName}';
       _emailController.text = widget.mycontact!.email;
       _avatarImageController.text = widget.mycontact!.avatar ?? '';
       _isFavoriteController.text = widget.mycontact!.isFavorite ?? '';
@@ -45,27 +46,28 @@ class _ProfileContactState extends State<ProfileContact> {
     }
   }
 
-    void _refreshData() async {
-      // Call DBHelper.readContacts() to get the updated data
-      List<Mycontact> updatedContacts = await DBHelper.readContacts();
+  void _refreshData() async {
+    // Call DBHelper.readContacts() to get the updated data
+    List<Mycontact> updatedContacts = await DBHelper.readContacts();
 
-      // Find the updated contact from the list based on ID
-      Mycontact updatedContact = updatedContacts.firstWhere(
-        (contact) => contact.id == widget.mycontact!.id,
-      );
+    // Find the updated contact from the list based on ID
+    Mycontact updatedContact = updatedContacts.firstWhere(
+      (contact) => contact.id == widget.mycontact!.id,
+    );
 
-      setState(() {
-        // Update the state with the new data
-        _fullnameController.text = '${updatedContact.firstName} ${updatedContact.lastName}';
-        _emailController.text = updatedContact.email;
+    setState(() {
+      // Update the state with the new data
+      _fullnameController.text =
+          '${updatedContact.firstName} ${updatedContact.lastName}';
+      _emailController.text = updatedContact.email;
 
-        // Update the profile image
-        _avatarImageController.text = updatedContact.avatar ?? '';
+      // Update the profile image
+      _avatarImageController.text = updatedContact.avatar ?? '';
 
-        // Update the favorite status
-        _isFavoriteController.text = updatedContact.isFavorite ?? '';
-      });
-    }
+      // Update the favorite status
+      _isFavoriteController.text = updatedContact.isFavorite ?? '';
+    });
+  }
 
   @override
   void dispose() {
@@ -112,12 +114,12 @@ class _ProfileContactState extends State<ProfileContact> {
         child: Text(
           controller.text,
           style: const TextStyle(
-              color: Colors.black,
-              fontSize: 14,
-              fontFamily: 'Montserrat',
-              fontWeight: FontWeight.w500,
-              height: 0,
-            ),
+            color: Colors.black,
+            fontSize: 14,
+            fontFamily: 'Montserrat',
+            fontWeight: FontWeight.w500,
+            height: 0,
+          ),
         ),
       ),
     );
@@ -141,12 +143,12 @@ class _ProfileContactState extends State<ProfileContact> {
             child: Text(
               controller.text,
               style: const TextStyle(
-              color: Colors.black,
-              fontSize: 14,
-              fontFamily: 'Montserrat',
-              fontWeight: FontWeight.w400,
-              height: 0,
-            ),
+                color: Colors.black,
+                fontSize: 14,
+                fontFamily: 'Montserrat',
+                fontWeight: FontWeight.w400,
+                height: 0,
+              ),
             ),
           ),
           const SizedBox(height: 3),
@@ -206,7 +208,8 @@ class _ProfileContactState extends State<ProfileContact> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: const Color(0xFF32BAA5), // Set your desired border color here
+                color: const Color(
+                    0xFF32BAA5), // Set your desired border color here
                 width: 5.0, // Set the width of the border
               ),
             ),
@@ -224,12 +227,19 @@ class _ProfileContactState extends State<ProfileContact> {
                     )
                   : (_avatarImageController.text.isNotEmpty
                       ? ClipOval(
-                          child: Image.network(
-                            _avatarImageController.text,
-                            width: 100,
-                            height: 100,
-                            fit: BoxFit.cover,
-                          ),
+                          child: _isNetworkImage(_avatarImageController.text)
+                              ? Image.network(
+                                  _avatarImageController.text,
+                                  width: 100,
+                                  height: 100,
+                                  fit: BoxFit.cover,
+                                )
+                              : Image.file(
+                                  File(_avatarImageController.text),
+                                  width: 100,
+                                  height: 100,
+                                  fit: BoxFit.cover,
+                                ),
                         )
                       : const Icon(Icons.camera_alt)),
             ),
@@ -267,10 +277,14 @@ class _ProfileContactState extends State<ProfileContact> {
     );
   }
 
+  bool _isNetworkImage(String path) {
+    return path.startsWith('http') || path.startsWith('https');
+  }
+
   Widget _buildElevatedButton(
       BuildContext context, TextEditingController emailController) {
     return SizedBox(
-      width: 360,
+      width: 300,
       height: 50,
       child: ElevatedButton(
         onPressed: () async {
@@ -303,12 +317,12 @@ class _ProfileContactState extends State<ProfileContact> {
         child: const Text(
           'Send Email',
           style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontFamily: 'Raleway',
-              fontWeight: FontWeight.w500,
-              height: 0.09,
-            ),
+            color: Colors.white,
+            fontSize: 16,
+            fontFamily: 'Raleway',
+            fontWeight: FontWeight.w500,
+            height: 0.09,
+          ),
         ),
       ),
     );
@@ -339,5 +353,4 @@ class _ProfileContactState extends State<ProfileContact> {
       ),
     );
   }
-    
 }

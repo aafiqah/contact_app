@@ -192,6 +192,7 @@ class _AddEditState extends State<AddEditContacts> {
               lastName: _lastnameController.text,
               email: _emailController.text,
               avatar: _avatarImageController.text,
+              isFavorite: widget.mycontact!.isFavorite,
             ));
             Navigator.of(context).pop(true);
           } else {

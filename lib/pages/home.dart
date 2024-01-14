@@ -8,6 +8,7 @@ import 'package:contact_app/pages/profile_contact.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'dart:io';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -232,7 +233,7 @@ class _HomePageState extends State<HomePage> {
                         foregroundColor:
                             const Color.fromRGBO(242, 201, 76, 100),
                         icon: Icons.edit,
-                        padding: const EdgeInsets.all(0.0),                        
+                        padding: const EdgeInsets.all(0.0),
                       ),
                       SlidableAction(
                         onPressed: (context) => deleteContact(mycontact),
@@ -432,11 +433,10 @@ class _HomePageState extends State<HomePage> {
       leading: CircleAvatar(
         radius: 27,
         backgroundImage: mycontact.avatar != null
-            ? (mycontact.avatar!.startsWith('http') ||
-                    mycontact.avatar!.startsWith('https'))
-                ? NetworkImage(mycontact.avatar!)
-                : AssetImage(mycontact.avatar!) as ImageProvider
-            : const AssetImage('assets/icons/Profile.svg'),
+            ? (mycontact.avatar!.startsWith('http') || mycontact.avatar!.startsWith('https'))
+                ? NetworkImage(mycontact.avatar!) as ImageProvider<Object>
+                : FileImage(File(mycontact.avatar!)) as ImageProvider<Object>// If avatar is a local file path
+            : const AssetImage('assets/icons/Profile.svg') as ImageProvider<Object>, // Default avatar
       ),
       title: Row(
         children: [
@@ -677,12 +677,12 @@ class _HomePageState extends State<HomePage> {
   void refreshHomePage() async {
     setState(() {
       // Reset the necessary state variables here
-      selectedCategory = 'all';
       currentContent = 'alllist';
+      selectedCategory = 'all';
     });
-
-    // Manually trigger fetching and displaying all data
-    setState(() {});
+    if (selectedCategory == 'favourite') {
+      setState(() {});
+    }
   }
 
   void navigateToDetail() {
