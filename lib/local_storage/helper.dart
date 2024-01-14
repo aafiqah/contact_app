@@ -4,17 +4,15 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart'; //import these
 
 class DBHelper {
-  //this is to initialize the SQLite database
-  //Database is from sqflite package
-  //as well as getDatabasesPath()
+  //initialize the SQLite database and create database
   static Future<Database> initDB() async {
     var dbPath = await getDatabasesPath();
-    String path = join(dbPath, 'mycontact.db');
-    //this is to create database
+    String path = join(dbPath, 'mycontact.db'); 
     return await openDatabase(path,
         version: 3, onCreate: _onCreate, onUpgrade: _onUpgrade);
   }
 
+  // upgrade logic for future versions if needed
   static void _onUpgrade(Database db, int oldVersion, int newVersion) async {
     print('Upgrading database from version $oldVersion to $newVersion');
     if (oldVersion < 3) {
@@ -22,11 +20,10 @@ class DBHelper {
       const sql = 'ALTER TABLE mycontact ADD COLUMN avatar TEXT';
       await db.execute(sql);
     }
-    // Add more upgrade logic for future versions if needed
     print('Upgrade complete');
   }
 
-  //build _onCreate function
+  //create table
   static Future _onCreate(Database db, int version) async {
     const sql = '''CREATE TABLE mycontact(
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -41,11 +38,8 @@ class DBHelper {
 
   //build create function (insert)
   static Future<int> createContacts(Mycontact mycontact) async {
-    Database db = await DBHelper.initDB();
-    //create mycontact using insert()
-    //return await db.insert('mycontact', mycontact.toJson());
+    Database db = await DBHelper.initDB();    
     try {
-      // create mycontact using insert()
       return await db.insert('mycontact', mycontact.toJson());
     } catch (e) {
       print('Error inserting data: $e');
@@ -57,7 +51,6 @@ class DBHelper {
   static Future<List<Mycontact>> readContacts() async {
     Database db = await DBHelper.initDB();
     var mycontact = await db.query('mycontact', orderBy: 'id');
-    //this is to list out the mycontact list from database
     //if empty, then return empty []
     List<Mycontact> contactList = mycontact.isNotEmpty
         ? mycontact.map((details) => Mycontact.fromJson(details)).toList()
@@ -68,16 +61,14 @@ class DBHelper {
   //build update function
   static Future<int> updateContacts(Mycontact mycontact) async {
     Database db = await DBHelper.initDB();
-    //update the existing mycontact
-    //according to its id
+    //update the existing mycontact according to its id
     return await db.update('mycontact', mycontact.toJson(),
         where: 'id = ?', whereArgs: [mycontact.id]);
   }
 
-  static Future<int> updateContactFavoriteStatus(
-      int id, String isFavorite) async {
+  // update the isFavorite field for the specified contact ID
+  static Future<int> updateContactFavoriteStatus(int id, String isFavorite) async {
     Database db = await DBHelper.initDB();
-    // update the isFavorite field for the specified contact ID
     return await db.update(
       'mycontact',
       {'isFavorite': isFavorite},
@@ -89,12 +80,11 @@ class DBHelper {
   //build delete function
   static Future<int> deleteContacts(int id) async {
     Database db = await DBHelper.initDB();
-    //delete existing mycontact
-    //according to its id
+    //delete existing mycontact according to its id
     return await db.delete('mycontact', where: 'id = ?', whereArgs: [id]);
   }
 
-  // Add this method to DBHelper class
+  // Save the contacts from remote to local storage
   static Future<void> createContactsFromRemote(List<UserModel> users) async {
     Database db = await DBHelper.initDB();
     List<Mycontact> contacts = users
@@ -104,8 +94,7 @@ class DBHelper {
               email: user.email,
               avatar: user.avatar,
             ))
-        .toList();
-    // Save the contacts to local storage
+        .toList();    
     for (Mycontact contact in contacts) {
       await db.insert('mycontact', contact.toJson());
     }

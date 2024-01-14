@@ -94,7 +94,6 @@ class _HomePageState extends State<HomePage> {
                     contact.lastName.toLowerCase().contains(searchQuery) ||
                     contact.email.toLowerCase().contains(searchQuery))
                 .toList();
-
             // Display filtered data from local storage
             return displayContactList(filteredContacts);
           } else {
@@ -119,7 +118,7 @@ class _HomePageState extends State<HomePage> {
                         contact.avatar != user.avatar);
                   }).toList();
 
-                  // Save new contacts to local storage
+                  // Save new contacts from remote to local storage
                   DBHelper.createContactsFromRemote(newContacts);
 
                   // Display filtered data from local storage
@@ -203,8 +202,7 @@ class _HomePageState extends State<HomePage> {
     } else if (currentContent == 'favouritelist') {
       return FutureBuilder<List<Mycontact>>(
         future: DBHelper.readContacts(),
-        builder:
-            (BuildContext context, AsyncSnapshot<List<Mycontact>> snapshot) {
+        builder:(BuildContext context, AsyncSnapshot<List<Mycontact>> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
               child: CircularProgressIndicator(),
@@ -342,8 +340,7 @@ class _HomePageState extends State<HomePage> {
           ),
           backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(
-                5.0), // Adjust the border radius as needed
+            borderRadius: BorderRadius.circular(5.0), 
           ),
           actions: <Widget>[
             Row(
@@ -359,12 +356,12 @@ class _HomePageState extends State<HomePage> {
                   },
                   style: TextButton.styleFrom(
                     side: const BorderSide(
-                      color: Color(0xFFDBDBDB), // Border color for "No" button
-                      width: 2.0, // Border width
+                      color: Color(0xFFDBDBDB), 
+                      width: 2.0, 
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius:
-                          BorderRadius.circular(0.0), // Adjust border radius
+                          BorderRadius.circular(0.0), 
                     ),
                     minimumSize: const Size(100.0, 50.0),
                   ),
@@ -375,7 +372,7 @@ class _HomePageState extends State<HomePage> {
                       fontFamily: 'Raleway',
                       fontWeight: FontWeight.w500,
                       height: 0.09,
-                      color: Color(0xFFFC1212), // Text color for "Yes" button
+                      color: Color(0xFFFC1212), 
                     ),
                   ),
                 ),
@@ -385,12 +382,12 @@ class _HomePageState extends State<HomePage> {
                   },
                   style: TextButton.styleFrom(
                     side: const BorderSide(
-                      color: Color(0xFFDBDBDB), // Border color for "No" button
-                      width: 2.0, // Border width
+                      color: Color(0xFFDBDBDB), 
+                      width: 2.0, 
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius:
-                          BorderRadius.circular(0.0), // Adjust border radius
+                          BorderRadius.circular(0.0),
                     ),
                     minimumSize: const Size(100.0, 50.0),
                   ),
@@ -401,7 +398,7 @@ class _HomePageState extends State<HomePage> {
                       fontFamily: 'Raleway',
                       fontWeight: FontWeight.w500,
                       height: 0.09,
-                      color: Color(0xFF32BAA5), // Text color for "No" button
+                      color: Color(0xFF32BAA5),
                     ),
                   ),
                 ),
@@ -434,8 +431,8 @@ class _HomePageState extends State<HomePage> {
         radius: 27,
         backgroundImage: mycontact.avatar != null
             ? (mycontact.avatar!.startsWith('http') || mycontact.avatar!.startsWith('https'))
-                ? NetworkImage(mycontact.avatar!) as ImageProvider<Object>
-                : FileImage(File(mycontact.avatar!)) as ImageProvider<Object>// If avatar is a local file path
+                ? NetworkImage(mycontact.avatar!) as ImageProvider<Object>// If avatar is a network file path
+                : FileImage(File(mycontact.avatar!)) as ImageProvider<Object> // If avatar is a local file path
             : const AssetImage('assets/icons/Profile.svg') as ImageProvider<Object>, // Default avatar
       ),
       title: Row(
@@ -472,14 +469,13 @@ class _HomePageState extends State<HomePage> {
       trailing: IconButton(
         icon: Image.asset(
           'assets/images/Send.png',
-          height: 27, // Adjust the height as needed
-          width: 23, // Adjust the width as needed
+          height: 27, 
+          width: 23, 
         ),
         onPressed: () async {
           await Navigator.of(context).push(MaterialPageRoute(
             builder: (_) => ProfileContact(mycontact: mycontact),
           ));
-          // This will be executed when ProfileContact is popped
           refreshHomePage();
         },
       ),
@@ -662,6 +658,16 @@ class _HomePageState extends State<HomePage> {
             currentContent = 'nodata';
           });
         },
+        // if what to add new contact in local storage
+        /*onPressed: () async {
+          final refresh = await Navigator.of(context)
+              .push(MaterialPageRoute(builder: (_) => const AddEditContacts()));
+          if (refresh == true) {
+            setState(() {
+              currentContent = 'alllist';
+            });
+          }
+        },*/
         backgroundColor: const Color(0xFF32BAA5),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(50.0),

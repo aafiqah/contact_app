@@ -208,9 +208,8 @@ class _ProfileContactState extends State<ProfileContact> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: const Color(
-                    0xFF32BAA5), // Set your desired border color here
-                width: 5.0, // Set the width of the border
+                color: const Color(0xFF32BAA5), 
+                width: 5.0, 
               ),
             ),
             child: CircleAvatar(
@@ -264,7 +263,7 @@ class _ProfileContactState extends State<ProfileContact> {
                       (_isFavoriteController.text == '1') ? '0' : '1';
                 });
 
-                // Save the updated isFavorite status to the database
+                // Save the updated isFavorite status to the local database
                 await DBHelper.updateContactFavoriteStatus(
                   widget.mycontact!.id!,
                   _isFavoriteController.text,

@@ -83,9 +83,8 @@ class _AddEditState extends State<AddEditContacts> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: const Color(
-                    0xFF32BAA5), // Set your desired border color here
-                width: 5.0, // Set the width of the border
+                color: const Color(0xFF32BAA5), 
+                width: 5.0, 
               ),
             ),
             child: CircleAvatar(
@@ -116,11 +115,11 @@ class _AddEditState extends State<AddEditContacts> {
             bottom: 6,
             right: 2,
             child: Container(
-              width: 30.0, // Set the desired width of the circle
-              height: 30.0, // Set the desired height of the circle
+              width: 30.0, 
+              height: 30.0, 
               decoration: const BoxDecoration(
                 shape: BoxShape.circle,
-                color: Color(0xFF32BAA5), // Set the desired background color
+                color: Color(0xFF32BAA5), 
               ),
               child: IconButton(
                 icon: const Icon(
@@ -185,6 +184,7 @@ class _AddEditState extends State<AddEditContacts> {
       height: 50,
       child: ElevatedButton(
         onPressed: () async {
+          // to update mycontact to local storage
           if (widget.mycontact != null) {
             await DBHelper.updateContacts(Mycontact(
               id: widget.mycontact!.id,
@@ -195,7 +195,9 @@ class _AddEditState extends State<AddEditContacts> {
               isFavorite: widget.mycontact!.isFavorite,
             ));
             Navigator.of(context).pop(true);
-          } else {
+          } 
+          // to create new mycontact to local storage
+          else {
             await DBHelper.createContacts(Mycontact(
               firstName: _firstnameController.text,
               lastName: _lastnameController.text,
