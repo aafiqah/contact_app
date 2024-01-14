@@ -153,6 +153,12 @@ class _AddEditState extends State<AddEditContacts> {
       controller: controller,
       decoration: InputDecoration(
         labelText: hintText,
+        labelStyle: const TextStyle(
+          color: Colors.grey, // color for the label when not focused
+        ),
+        floatingLabelStyle: const TextStyle(
+          color: Color(0xFF32BAA5), // color for the label when focused
+        ),
         contentPadding:
             const EdgeInsets.symmetric(vertical: 20.0, horizontal: 20.0),
         floatingLabelBehavior: FloatingLabelBehavior.auto,
