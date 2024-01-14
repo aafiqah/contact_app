@@ -1,4 +1,6 @@
-# Flutter Test
+# Contact App Assessment
+----
+![Logo](/assets/images/contact_app.png)
 ----
 ### Dummy Profile Listing
 - [Figma] - Please refer to the given UI
