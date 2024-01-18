@@ -202,7 +202,8 @@ class _HomePageState extends State<HomePage> {
     } else if (currentContent == 'favouritelist') {
       return FutureBuilder<List<Mycontact>>(
         future: DBHelper.readContacts(),
-        builder:(BuildContext context, AsyncSnapshot<List<Mycontact>> snapshot) {
+        builder:
+            (BuildContext context, AsyncSnapshot<List<Mycontact>> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
               child: CircularProgressIndicator(),
@@ -212,61 +213,67 @@ class _HomePageState extends State<HomePage> {
                 .where((contact) => contact.isFavorite == '1')
                 .toList();
 
-            return ListView.separated(
-              separatorBuilder: (BuildContext context, int index) =>
-                  const SizedBox(height: 10),
-              itemCount: contactsToShow.length,
-              itemBuilder: (BuildContext context, int index) {
-                Mycontact mycontact = contactsToShow[index];
-                return Slidable(
-                  key: ValueKey(mycontact.id),
-                  endActionPane: ActionPane(
-                    motion: const BehindMotion(),
-                    dismissible: DismissiblePane(onDismissed: () {}),
-                    children: [
-                      SlidableAction(
-                        onPressed: (context) => editContact(mycontact),
-                        backgroundColor:
-                            const Color.fromARGB(255, 235, 248, 246),
-                        foregroundColor:
-                            const Color.fromRGBO(242, 201, 76, 100),
-                        icon: Icons.edit,
-                        padding: const EdgeInsets.all(0.0),
-                      ),
-                      SlidableAction(
-                        onPressed: (context) => deleteContact(mycontact),
-                        backgroundColor:
-                            const Color.fromARGB(255, 235, 248, 246),
-                        foregroundColor: Colors.red,
-                        icon: Icons.delete,
-                      ),
-                    ],
+            if (contactsToShow.isNotEmpty) {
+              // Display favorite contacts
+              return ListView.separated(
+                separatorBuilder: (BuildContext context, int index) =>
+                    const SizedBox(height: 10),
+                itemCount: contactsToShow.length,
+                itemBuilder: (BuildContext context, int index) {
+                  Mycontact mycontact = contactsToShow[index];
+                  return Slidable(
+                    key: ValueKey(mycontact.id),
+                    endActionPane: ActionPane(
+                      motion: const BehindMotion(),
+                      dismissible: DismissiblePane(onDismissed: () {}),
+                      children: [
+                        SlidableAction(
+                          onPressed: (context) => editContact(mycontact),
+                          backgroundColor:
+                              const Color.fromARGB(255, 235, 248, 246),
+                          foregroundColor:
+                              const Color.fromRGBO(242, 201, 76, 100),
+                          icon: Icons.edit,
+                          padding: const EdgeInsets.all(0.0),
+                        ),
+                        SlidableAction(
+                          onPressed: (context) => deleteContact(mycontact),
+                          backgroundColor:
+                              const Color.fromARGB(255, 235, 248, 246),
+                          foregroundColor: Colors.red,
+                          icon: Icons.delete,
+                        ),
+                      ],
+                    ),
+                    child: buildContactListTile(mycontact),
+                  );
+                },
+              );
+            } else {
+              // No favorite contacts
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/images/home_img.png',
+                    height: 260,
+                    width: 260,
                   ),
-                  child: buildContactListTile(mycontact),
-                );
-              },
-            );
+                  const SizedBox(height: 20),
+                  const Text(
+                    'No favorite contacts yet.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              );
+            }
           } else {
             // No data available
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset(
-                  'assets/images/home_img.png',
-                  height: 260,
-                  width: 260,
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                  'No favorite contacts yet.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            );
+            return const SizedBox.shrink();
           }
         },
       );
@@ -340,7 +347,7 @@ class _HomePageState extends State<HomePage> {
           ),
           backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(5.0), 
+            borderRadius: BorderRadius.circular(5.0),
           ),
           actions: <Widget>[
             Row(
@@ -356,12 +363,11 @@ class _HomePageState extends State<HomePage> {
                   },
                   style: TextButton.styleFrom(
                     side: const BorderSide(
-                      color: Color(0xFFDBDBDB), 
-                      width: 2.0, 
+                      color: Color(0xFFDBDBDB),
+                      width: 2.0,
                     ),
                     shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(0.0), 
+                      borderRadius: BorderRadius.circular(0.0),
                     ),
                     minimumSize: const Size(100.0, 50.0),
                   ),
@@ -372,7 +378,7 @@ class _HomePageState extends State<HomePage> {
                       fontFamily: 'Raleway',
                       fontWeight: FontWeight.w500,
                       height: 0.09,
-                      color: Color(0xFFFC1212), 
+                      color: Color(0xFFFC1212),
                     ),
                   ),
                 ),
@@ -382,12 +388,11 @@ class _HomePageState extends State<HomePage> {
                   },
                   style: TextButton.styleFrom(
                     side: const BorderSide(
-                      color: Color(0xFFDBDBDB), 
-                      width: 2.0, 
+                      color: Color(0xFFDBDBDB),
+                      width: 2.0,
                     ),
                     shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(0.0),
+                      borderRadius: BorderRadius.circular(0.0),
                     ),
                     minimumSize: const Size(100.0, 50.0),
                   ),
@@ -430,10 +435,14 @@ class _HomePageState extends State<HomePage> {
       leading: CircleAvatar(
         radius: 27,
         backgroundImage: mycontact.avatar != null
-            ? (mycontact.avatar!.startsWith('http') || mycontact.avatar!.startsWith('https'))
-                ? NetworkImage(mycontact.avatar!) as ImageProvider<Object>// If avatar is a network file path
-                : FileImage(File(mycontact.avatar!)) as ImageProvider<Object> // If avatar is a local file path
-            : const AssetImage('assets/icons/Profile.svg') as ImageProvider<Object>, // Default avatar
+            ? (mycontact.avatar!.startsWith('http') ||
+                    mycontact.avatar!.startsWith('https'))
+                ? NetworkImage(mycontact.avatar!)
+                    as ImageProvider<Object> // If avatar is a network file path
+                : FileImage(File(mycontact.avatar!))
+                    as ImageProvider<Object> // If avatar is a local file path
+            : const AssetImage('assets/icons/Profile.svg')
+                as ImageProvider<Object>, // Default avatar
       ),
       title: Row(
         children: [
@@ -469,8 +478,8 @@ class _HomePageState extends State<HomePage> {
       trailing: IconButton(
         icon: Image.asset(
           'assets/images/Send.png',
-          height: 27, 
-          width: 23, 
+          height: 27,
+          width: 23,
         ),
         onPressed: () async {
           await Navigator.of(context).push(MaterialPageRoute(
