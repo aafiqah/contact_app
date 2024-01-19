@@ -664,6 +664,7 @@ class _HomePageState extends State<HomePage> {
         onPressed: () {
           setState(() {
             // Reset the necessary state variables here
+            selectedCategory = 'all';
             currentContent = 'nodata';
           });
         },
