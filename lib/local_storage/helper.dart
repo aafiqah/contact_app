@@ -36,7 +36,23 @@ class DBHelper {
   await db.execute(sql);
 }
 
-  //build create function (insert)
+// Save the contacts from remote to local storage
+  static Future<void> createContactsFromRemote(List<UserModel> users) async {
+    Database db = await DBHelper.initDB();
+    List<Mycontact> contacts = users
+        .map((user) => Mycontact(
+              firstName: user.firstName,
+              lastName: user.lastName,
+              email: user.email,
+              avatar: user.avatar,
+            ))
+        .toList();    
+    for (Mycontact contact in contacts) {
+      await db.insert('mycontact', contact.toJson());
+    }
+  }
+
+  //build create function (insert data in mycontact table)
   static Future<int> createContacts(Mycontact mycontact) async {
     Database db = await DBHelper.initDB();    
     try {
@@ -66,6 +82,13 @@ class DBHelper {
         where: 'id = ?', whereArgs: [mycontact.id]);
   }
 
+  //build delete function
+  static Future<int> deleteContacts(int id) async {
+    Database db = await DBHelper.initDB();
+    //delete existing mycontact according to its id
+    return await db.delete('mycontact', where: 'id = ?', whereArgs: [id]);
+  }
+
   // update the isFavorite field for the specified contact ID
   static Future<int> updateContactFavoriteStatus(int id, String isFavorite) async {
     Database db = await DBHelper.initDB();
@@ -77,26 +100,4 @@ class DBHelper {
     );
   }
 
-  //build delete function
-  static Future<int> deleteContacts(int id) async {
-    Database db = await DBHelper.initDB();
-    //delete existing mycontact according to its id
-    return await db.delete('mycontact', where: 'id = ?', whereArgs: [id]);
-  }
-
-  // Save the contacts from remote to local storage
-  static Future<void> createContactsFromRemote(List<UserModel> users) async {
-    Database db = await DBHelper.initDB();
-    List<Mycontact> contacts = users
-        .map((user) => Mycontact(
-              firstName: user.firstName,
-              lastName: user.lastName,
-              email: user.email,
-              avatar: user.avatar,
-            ))
-        .toList();    
-    for (Mycontact contact in contacts) {
-      await db.insert('mycontact', contact.toJson());
-    }
-  }
 }
